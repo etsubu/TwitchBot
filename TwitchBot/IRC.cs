@@ -88,9 +88,9 @@ namespace TwitchBot
             while(true)
             {
                 string line = this.reader.ReadLine();
-                Console.WriteLine(line);
                 ChatMessage message = ParseMessage(line);
                 // Respond to pings
+                Console.WriteLine(line);
                 if (message.GetCommand().Equals("PING"))
                 {
                     SendMessage("PONG " + line.Substring(line.IndexOf("PING") + 5));

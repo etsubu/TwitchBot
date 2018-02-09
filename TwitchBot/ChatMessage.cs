@@ -9,7 +9,7 @@ namespace TwitchBot
     /// </summary>
     class ChatMessage
     {
-        private string prefix, trailing, command;
+        private string prefix, trailing, command, username;
         private string[] parameters;
 
         /// <summary>
@@ -25,6 +25,24 @@ namespace TwitchBot
             this.command = command;
             this.trailing = trailing;
             this.parameters = parameters;
+            this.username = null;
+            if(command.Equals("PRIVMSG") && prefix.Length > 1 && prefix[0] == ':')
+            {
+                int nameEndIndex = prefix.IndexOf("!");
+                if(nameEndIndex != -1)
+                {
+                    this.username = prefix.Substring(1, nameEndIndex - 1);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the name of the user who sent the message if available. This value can be null if the information was unavailable
+        /// </summary>
+        /// <returns>Name of the sender or null if it the info doesn't exist</returns>
+        public string GetUsername()
+        {
+            return this.username;
         }
 
         /// <summary>
