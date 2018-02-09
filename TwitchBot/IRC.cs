@@ -52,7 +52,7 @@ namespace TwitchBot
         /// <summary>
         /// Disconnects from the IRC server
         /// </summary>
-        public void disconnect()
+        public void Disconnect()
         {
             this.writer.Write("QUIT");
             this.writer.Flush();
@@ -67,6 +67,7 @@ namespace TwitchBot
         public void SendMessage(string message)
         {
             this.writer.Write(message + "\r\n");
+            this.writer.Flush();
         }
 
         /// <summary>
@@ -77,6 +78,7 @@ namespace TwitchBot
         public void SendMessage(string message, string channel)
         {
             this.writer.Write("PRIVMSG " + channel + " :" + message + "\r\n");
+            this.writer.Flush();
         }
         /// <summary>
         /// Reads all the incoming IRC messages
@@ -88,7 +90,14 @@ namespace TwitchBot
                 string line = this.reader.ReadLine();
                 Console.WriteLine(line);
                 ChatMessage message = ParseMessage(line);
-                this.MessageReceivedEvent.Invoke(message);
+                // Respond to pings
+                if (message.GetCommand().Equals("PING"))
+                {
+                    SendMessage("PONG " + line.Substring(line.IndexOf("PING") + 5));
+                }
+                else {
+                    this.MessageReceivedEvent.Invoke(message);
+                }
             }
         }
 

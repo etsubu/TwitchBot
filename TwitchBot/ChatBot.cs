@@ -8,27 +8,25 @@ namespace TwitchBot
     {
         private IRC irc;
 
+        /// <summary>
+        /// Called when the an IRC message is received
+        /// </summary>
+        /// <param name="message">ChatMessage that contains the parsed message</param>
         public void MessageReceived(ChatMessage message)
         {
             Console.WriteLine(message.GetCommand());
-           /* if(message.GetCommand() == "376")
-            {
-                this.irc.JoinChannel("#nagrodus");
-                
-            }*/
-            if(message.GetCommand() == "366")
-            {
-                Console.WriteLine("hello");
-                this.irc.SendMessage("Hello world", "#nagrodus");
-            }
         }
 
+        /// <summary>
+        /// Initializes ChatBot
+        /// </summary>
         public ChatBot()
         {
             this.irc = new IRC();
             this.irc.MessageReceivedEvent += MessageReceived;
-            this.irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", "");
+            this.irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", /*OAUTH KEY HERE*/"");
             this.irc.JoinChannel("#nagrodus");
+            this.irc.SendMessage("Hello world", "#nagrodus");
         }
     }
 }
