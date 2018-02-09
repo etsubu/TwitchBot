@@ -13,42 +13,16 @@ namespace TwitchBot
     class IRC
     {
         private Socket socket;
-        private LinkedList<IMessageObserver> observers;
         private Thread listenerThread;
+        public delegate void MessageReceived(ChatMessage message);
+        public event MessageReceived MessageReceivedEvent;
 
         /// <summary>
         /// Initializes the IRC object
         /// </summary>
-        /// <param name="observer">Initial observer to receive messages from the IRC server</param>
-        public IRC(IMessageObserver observer)
+        public IRC()
         {
-            this.observers = new LinkedList<IMessageObserver>();
-            this.observers.AddLast(observer);
-        }
 
-        /// <summary>
-        /// Adds a new observer to receive messages from the IRC server
-        /// </summary>
-        /// <param name="observer">Observer to register</param>
-        public void RegisterObserver(IMessageObserver observer)
-        {
-            lock(this.observers)
-            {
-                this.observers.AddLast(observer);
-            }
-        }
-
-        /// <summary>
-        /// Unregisters the given observer so it won't receive further messages from the IRC server
-        /// </summary>
-        /// <param name="observer">Observer to unregister</param>
-        /// <returns>True if the observer was unregister and false if it did not exist</returns>
-        public bool UnregisterObserver(IMessageObserver observer)
-        {
-            lock(this.observers)
-            {
-                return this.observers.Remove(observer);
-            }
         }
 
         /// <summary>
@@ -68,6 +42,9 @@ namespace TwitchBot
             return true;
         }
 
+        /// <summary>
+        /// Reads all the incoming IRC messages
+        /// </summary>
         public void MessageReader()
         {
             string previous = "";
@@ -91,7 +68,7 @@ namespace TwitchBot
                     previous = "";
                 }
                 ChatMessage message = ParseMessage(rawMessage.Substring(0, messageEnd));
-
+                this.MessageReceivedEvent.Invoke(message);
             }
         }
 
@@ -104,6 +81,11 @@ namespace TwitchBot
             this.socket.Send(Encoding.UTF8.GetBytes("JOIN " + channel + "\r\n"));
         }
 
+        /// <summary>
+        /// Parses a single IRC message to its corresponding parts
+        /// </summary>
+        /// <param name="rawMessage">Raw representation of a single IRC message</param>
+        /// <returns>ChatMessage object containing the strucuted IRC message</returns>
         private ChatMessage ParseMessage(string rawMessage)
         {
             string prefix = "", trailing = "", command = "";
@@ -147,7 +129,7 @@ namespace TwitchBot
             {
                 command = cmdAndParameters;
             }
-            return null;
+            return new ChatMessage(prefix, command, trailing, parameters);
         }
     }
 }
