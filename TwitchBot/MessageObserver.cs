@@ -7,7 +7,7 @@ namespace TwitchBot
     /// <summary>
     /// Defines the interface for listening received IRC messages
     /// </summary>
-    interface IMessageListener
+    interface IMessageObserver
     {
         /// <summary>
         /// Called when a message is received over IRC
