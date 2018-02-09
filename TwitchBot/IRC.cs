@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -12,7 +13,9 @@ namespace TwitchBot
     /// </summary>
     class IRC
     {
-        private Socket socket;
+        private TcpClient client;
+        private StreamReader reader;
+        private StreamWriter writer;
         private Thread listenerThread;
         public delegate void MessageReceived(ChatMessage message);
         public event MessageReceived MessageReceivedEvent;
@@ -31,43 +34,60 @@ namespace TwitchBot
         /// <param name="host">Address of the server</param>
         /// <param name="port">Port to connect to</param>
         /// <returns></returns>
-        public bool ConnectServer(string host, int port)
+        public bool ConnectServer(string host, int port, string user, string password)
         {
-            if (this.socket.Connected)
+            if (this.client != null && this.client.Connected)
                 return false;
-            this.socket = new Socket(SocketType.Stream, ProtocolType.IPv4);
-            this.socket.Connect(host, port);
+            this.client = new TcpClient(host, port);
+            this.reader = new StreamReader(this.client.GetStream());
+            this.writer = new StreamWriter(this.client.GetStream());
+            SendMessage("PASS " + password);
+            SendMessage("USER " + user + " 0 * :...");
+            SendMessage("NICK " + user);
             this.listenerThread = new Thread(MessageReader);
             this.listenerThread.Start();
             return true;
         }
 
         /// <summary>
+        /// Disconnects from the IRC server
+        /// </summary>
+        public void disconnect()
+        {
+            this.writer.Write("QUIT");
+            this.writer.Flush();
+            this.client.Close();
+            this.listenerThread.Join();
+        }
+
+        /// <summary>
+        /// Sends a raw message to the IRC server. Adds newline to the end
+        /// </summary>
+        /// <param name="message">IRC message to send</param>
+        public void SendMessage(string message)
+        {
+            this.writer.Write(message + "\r\n");
+        }
+
+        /// <summary>
+        /// Sends a message to the given channel
+        /// </summary>
+        /// <param name="message">Message to send</param>
+        /// <param name="channel">Channel to send the message to</param>
+        public void SendMessage(string message, string channel)
+        {
+            this.writer.Write("PRIVMSG " + channel + " :" + message + "\r\n");
+        }
+        /// <summary>
         /// Reads all the incoming IRC messages
         /// </summary>
         public void MessageReader()
         {
-            string previous = "";
             while(true)
             {
-                byte[] buffer = new byte[256];
-                int len = this.socket.Receive(buffer);
-                string rawMessage = previous + Encoding.UTF8.GetString(buffer);
-                int messageEnd = rawMessage.IndexOf("\r\n");
-                if(messageEnd == -1)
-                {
-                    previous = rawMessage;
-                    continue;
-                }
-                else if(messageEnd < rawMessage.Length - 3)
-                {
-                    previous = rawMessage.Substring(messageEnd + 2);
-                }
-                else
-                {
-                    previous = "";
-                }
-                ChatMessage message = ParseMessage(rawMessage.Substring(0, messageEnd));
+                string line = this.reader.ReadLine();
+                Console.WriteLine(line);
+                ChatMessage message = ParseMessage(line);
                 this.MessageReceivedEvent.Invoke(message);
             }
         }
@@ -78,7 +98,8 @@ namespace TwitchBot
         /// <param name="channel">Name of the channel to join</param>
         public void JoinChannel(string channel)
         {
-            this.socket.Send(Encoding.UTF8.GetBytes("JOIN " + channel + "\r\n"));
+            this.writer.Write("JOIN " + channel + "\r\n");
+            this.writer.Flush();
         }
 
         /// <summary>

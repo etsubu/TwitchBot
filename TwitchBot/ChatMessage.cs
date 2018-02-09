@@ -19,5 +19,25 @@ namespace TwitchBot
             this.trailing = trailing;
             this.parameters = parameters;
         }
+
+        public string GetPrefix()
+        {
+            return this.prefix;
+        }
+
+        public string GetTrailing()
+        {
+            return this.trailing;
+        }
+
+        public string GetCommand()
+        {
+            return this.command;
+        }
+
+        public string[] GetParameters()
+        {
+            return this.parameters;
+        }
     }
 }
