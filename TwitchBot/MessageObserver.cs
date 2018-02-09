@@ -12,9 +12,7 @@ namespace TwitchBot
         /// <summary>
         /// Called when a message is received over IRC
         /// </summary>
-        /// <param name="message">The actual content of the message</param>
-        /// <param name="sender">Sender of the message</param>
-        /// <param name="channel">What channel it was sent on</param>
-        void MessageReceived(string message, string sender, string channel);
+        /// <param name="message">ChatMessage that contains all the information about the received message</param>
+        void MessageReceived(ChatMessage message);
     }
 }
