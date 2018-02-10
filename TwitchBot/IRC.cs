@@ -93,7 +93,7 @@ namespace TwitchBot
                 if (message.Command.Equals("PING"))
                     SendMessage($"PONG {line.Substring(line.IndexOf("PING", StringComparison.Ordinal) + 5)}");
                 else
-                    MessageReceivedEvent.Invoke(message);
+                    MessageReceivedEvent?.Invoke(message);
             }
         }
 
