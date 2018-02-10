@@ -70,14 +70,14 @@ namespace TwitchBot.Commands
             if (parts[1].Equals("set") && parts.Length == 4)
             {
                 if (!int.TryParse(parts[3], out int permission) || permission < 0 || permission > MaxPermission)
-                    return "Illegal permission \"" + parts[3] + "\"";
+                    return $"Illegal permission \"{parts[3]}\"";
 
                 SetPermission(parts[2], permission);
-                return "Permission for " + parts[2] + " set to " + permission;
+                return $"Permission for {parts[2]} set to {permission}";
             }
 
             if (parts[1].Equals("query") && parts.Length == 3)
-                return "Permission for " + parts[2] + " is " + QueryPermission(parts[2]);
+                return $"Permission for {parts[2]} is {QueryPermission(parts[2])}";
 
             return "Invalid command";
         }

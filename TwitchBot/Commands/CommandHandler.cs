@@ -93,7 +93,7 @@ namespace TwitchBot.Commands
                 //Check if the sender has permission to use the requested command
                 if (!commands[name].HasPermission(permission.QueryPermission(sender)))
                 {
-                    irc.SendMessage(sender + " You lack the permission to use this command", channel);
+                    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
                     return false;
                 }
                 //Execute the command and send the response
