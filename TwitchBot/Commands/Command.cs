@@ -7,10 +7,10 @@ namespace TwitchBot.Commands
     /// <summary>
     /// Defines a single command
     /// </summary>
-    abstract class Command
+    internal abstract class Command
     {
-        private string name;
-        private int requiredPermission;
+        private readonly string name;
+        private readonly int requiredPermission;
 
         /// <summary>
         /// Initializes the Command 

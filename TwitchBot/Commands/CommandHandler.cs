@@ -7,10 +7,10 @@ namespace TwitchBot.Commands
     /// <summary>
     /// Processes all the commands sent for the bot
     /// </summary>
-    class CommandHandler
+    internal class CommandHandler
     {
-        private Dictionary<string, Command> commands;
-        private IRC irc;
+        private readonly Dictionary<string, Command> commands;
+        private readonly IRC irc;
 
         /// <summary>
         /// Initializes CommandHandler

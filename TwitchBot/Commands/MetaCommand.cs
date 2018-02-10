@@ -7,9 +7,9 @@ namespace TwitchBot.Commands
     /// <summary>
     /// MetaCommand handles modifying, adding, removing and listing of the existing commands
     /// </summary>
-    class MetaCommand:Command
+    internal class MetaCommand:Command
     {
-        private CommandHandler handler;
+        private readonly CommandHandler handler;
 
         /// <summary>
         /// Initializes MetaCommand

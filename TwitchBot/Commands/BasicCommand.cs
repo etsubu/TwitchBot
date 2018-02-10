@@ -7,9 +7,9 @@ namespace TwitchBot.Commands
     /// <summary>
     /// BasicCommand defines a simple Command-Response behaviour where the response value is static
     /// </summary>
-    class BasicCommand : Command
+    internal class BasicCommand : Command
     {
-        private string response;
+        private readonly string response;
 
         /// <summary>
         /// Initializes the BasicCommand
