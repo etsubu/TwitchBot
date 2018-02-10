@@ -3,12 +3,31 @@
     /// <summary>
     /// Contains a single IRC message
     /// </summary>
-    class ChatMessage
+    internal class ChatMessage
     {
-        private readonly string prefix;
-        private readonly string trailing;
-        private readonly string command;
-        private readonly string[] parameters;
+        /// <summary>
+        /// Prefix of the message
+        /// </summary>
+        /// <returns>Returns the prefix</returns>
+        public string Prefix { get; }
+
+        /// <summary>
+        /// Trailing part of the message
+        /// </summary>
+        /// <returns>Returns the trailing part</returns>
+        public string Trailing { get; }
+
+        /// <summary>
+        /// Command of the message
+        /// </summary>
+        /// <returns>Returns the command</returns>
+        public string Command { get; }
+
+        /// <summary>
+        /// Parameters of the message
+        /// </summary>
+        /// <returns>Returns the parameters</returns>
+        public string[] Parameters { get; }
 
         /// <summary>
         /// Initializes the ChatMessage
@@ -19,46 +38,10 @@
         /// <param name="parameters">Parameters of the message (optional)</param>
         public ChatMessage(string prefix, string command, string trailing, string[] parameters)
         {
-            this.prefix = prefix;
-            this.command = command;
-            this.trailing = trailing;
-            this.parameters = parameters;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>Returns the prefix</returns>
-        public string GetPrefix()
-        {
-            return prefix;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>Returns the trailing part</returns>
-        public string GetTrailing()
-        {
-            return trailing;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>Returns the command</returns>
-        public string GetCommand()
-        {
-            return command;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>Returns the parameters</returns>
-        public string[] GetParameters()
-        {
-            return parameters;
+            Prefix = prefix;
+            Command = command;
+            Trailing = trailing;
+            Parameters = parameters;
         }
     }
 }

@@ -87,7 +87,7 @@ namespace TwitchBot
                 ChatMessage message = ParseMessage(line);
 
                 // Respond to pings
-                if (message.GetCommand().Equals("PING"))
+                if (message.Command.Equals("PING"))
                     SendMessage("PONG " + line.Substring(line.IndexOf("PING") + 5));
                 else
                     MessageReceivedEvent.Invoke(message);

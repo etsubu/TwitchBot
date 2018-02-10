@@ -24,7 +24,7 @@ namespace TwitchBot
         /// <param name="message">ChatMessage that contains the parsed message</param>
         public void MessageReceived(ChatMessage message)
         {
-            Console.WriteLine(message.GetCommand());
+            Console.WriteLine(message.Command);
         }
     }
 }
