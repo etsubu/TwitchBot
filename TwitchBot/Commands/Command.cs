@@ -22,10 +22,8 @@ namespace TwitchBot.Commands
         /// Initializes the Command 
         /// </summary>
         /// <param name="name">The identifier of the command</param>
-        public Command(string name)
+        public Command(string name) : this(name, 0)
         {
-            this.name = name;
-            requiredPermission = 0;
         }
 
         /// <summary>
