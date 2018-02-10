@@ -59,8 +59,9 @@ namespace TwitchBot.Commands
         /// Processes updating or querying permissions of users
         /// </summary>
         /// <param name="line">Command line</param>
+        /// <param name="sender">sender name</param>
         /// <returns>Message telling the result of the command</returns>
-        public override string Process(string line)
+        public override string Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
 

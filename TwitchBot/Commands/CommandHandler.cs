@@ -97,7 +97,7 @@ namespace TwitchBot.Commands
                     return false;
                 }
                 //Execute the command and send the response
-                irc.SendMessage(commands[name].Process(line), channel);
+                irc.SendMessage(commands[name].Process(line, sender), channel);
             }
 
             return true;

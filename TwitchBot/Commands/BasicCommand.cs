@@ -31,8 +31,9 @@ namespace TwitchBot.Commands
         /// Checks if the line belongs to this command and processes it if it does
         /// </summary>
         /// <param name="line">Command line to process</param>
+        /// <param name="sender">sender name</param>
         /// <returns>Static response to the command or null if the line does not belong to this command</returns>
-        public override string Process(string line)
+        public override string Process(string line, string sender)
         {
             if (BelongsTo(line))
                 return response;

@@ -31,6 +31,6 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="line"></param>
         /// <returns>Running time in hours, minutes and seconds</returns>
-        public override string Process(string line) => (DateTimeOffset.UtcNow - startTime).ToFriendlyString();
+        public override string Process(string line, string sender) => (DateTimeOffset.UtcNow - startTime).ToFriendlyString();
     }
 }
