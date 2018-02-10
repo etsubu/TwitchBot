@@ -22,6 +22,15 @@ namespace TwitchBot
         }
 
         /// <summary>
+        /// BasicCommand can be removed by the user
+        /// </summary>
+        /// <returns>True</returns>
+        public override bool IsRemoveable()
+        {
+            return true;
+        }
+
+        /// <summary>
         /// Checks if the line belongs to this command and processes it if it does
         /// </summary>
         /// <param name="line">Command line to process</param>
