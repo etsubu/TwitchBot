@@ -62,7 +62,7 @@ namespace TwitchBot.Commands
         /// <returns>True if the given permission is enough, false if not</returns>
         public bool HasPermission(int permission)
         {
-            return permission >= this.requiredPermission;
+            return permission >= requiredPermission;
         }
 
         /// <summary>

@@ -9,12 +9,12 @@ namespace TwitchBot.Commands
     /// </summary>
     internal class UptimeCommand : Command
     {
-        private int startTime;
+        private readonly int startTime;
 
         /// <summary>
         /// Initializes UptimeCommand
         /// </summary>
-        public UptimeCommand():base("uptime")
+        public UptimeCommand() : base("uptime")
         {
             startTime = Environment.TickCount;
         }

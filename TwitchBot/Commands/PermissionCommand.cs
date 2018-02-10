@@ -9,13 +9,13 @@ namespace TwitchBot.Commands
     /// </summary>
     internal class PermissionCommand : Command
     {
-        public const int MAX_PERMISSION = 10;
-        private Dictionary<string, int> permissions;
+        public const int MaxPermission = 10;
+        private readonly Dictionary<string, int> permissions;
 
         /// <summary>
         /// Initializes PermissionsCommand
         /// </summary>
-        public PermissionCommand():base("permission")
+        public PermissionCommand() : base("permission")
         {
             permissions = new Dictionary<string, int>();
         }
@@ -72,7 +72,7 @@ namespace TwitchBot.Commands
 
             if (parts[1].Equals("set") && parts.Length == 4)
             {
-                if (!int.TryParse(parts[3], out int permission) || permission < 0 || permission > MAX_PERMISSION)
+                if (!int.TryParse(parts[3], out int permission) || permission < 0 || permission > MaxPermission)
                     return "Illegal permission \"" + parts[3] + "\"";
 
                 SetPermission(parts[2], permission);
