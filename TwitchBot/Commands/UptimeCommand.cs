@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using TwitchBot.Extensions;
 
 namespace TwitchBot.Commands
 {
@@ -15,14 +16,14 @@ namespace TwitchBot.Commands
         /// <returns>False</returns>
         public override bool IsRemoveable => false;
 
-        private readonly int startTime;
+        private readonly DateTimeOffset startTime;
 
         /// <summary>
         /// Initializes UptimeCommand
         /// </summary>
         public UptimeCommand() : base("uptime")
         {
-            startTime = Environment.TickCount;
+            startTime = DateTimeOffset.UtcNow;
         }
 
         /// <summary>
@@ -30,28 +31,6 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="line"></param>
         /// <returns>Running time in hours, minutes and seconds</returns>
-        public override string Process(string line)
-        {
-            string uptime;
-            int diff = (Environment.TickCount - startTime) / 1000;
-            if (diff > 60 * 60)
-            {
-                int hours = diff / (60 * 60);
-                diff = diff % (60 * 60);
-                int minutes = (diff / 60);
-                int seconds = (diff % 60);
-                uptime = "Up for " + hours + " hours " + minutes + " minutes " + seconds + " seconds";
-            }
-            else if (diff > 60)
-            {
-                int minutes = (diff / 60);
-                int seconds = (diff % 60);
-                uptime = "Up for " + minutes + " minutes " + seconds + " seconds";
-            }
-            else
-                uptime = "Up for " + diff + " seconds";
-
-            return uptime;
-        }
+        public override string Process(string line) => (DateTimeOffset.UtcNow - startTime).ToFriendlyString();
     }
 }
