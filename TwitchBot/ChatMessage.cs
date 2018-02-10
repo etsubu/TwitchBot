@@ -32,11 +32,11 @@
         /// <summary>
         /// Initializes the ChatMessage
         /// </summary>
-        /// <param name="prefix">Prefix of the message (optional)</param>
+        /// <param name="prefix">Prefix of the message</param>
         /// <param name="command">Command of the received message</param>
-        /// <param name="trailing">Trailing part of the message (optional)</param>
-        /// <param name="parameters">Parameters of the message (optional)</param>
-        public ChatMessage(string prefix, string command, string trailing, string[] parameters)
+        /// <param name="trailing">Trailing part of the message</param>
+        /// <param name="parameters">Parameters of the message</param>
+        public ChatMessage(string command, string trailing = "", string prefix = "", params string[] parameters)
         {
             Prefix = prefix;
             Command = command;
