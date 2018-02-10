@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TwitchBot
+﻿namespace TwitchBot
 {
     /// <summary>
     /// Initializes the program

@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TwitchBot
+﻿namespace TwitchBot
 {
     /// <summary>
     /// Contains a single IRC message
     /// </summary>
     class ChatMessage
     {
-        private string prefix, trailing, command;
-        private string[] parameters;
+        private readonly string prefix;
+        private readonly string trailing;
+        private readonly string command;
+        private readonly string[] parameters;
 
         /// <summary>
         /// Initializes the ChatMessage
@@ -33,7 +31,7 @@ namespace TwitchBot
         /// <returns>Returns the prefix</returns>
         public string GetPrefix()
         {
-            return this.prefix;
+            return prefix;
         }
 
         /// <summary>
@@ -42,7 +40,7 @@ namespace TwitchBot
         /// <returns>Returns the trailing part</returns>
         public string GetTrailing()
         {
-            return this.trailing;
+            return trailing;
         }
 
         /// <summary>
@@ -51,7 +49,7 @@ namespace TwitchBot
         /// <returns>Returns the command</returns>
         public string GetCommand()
         {
-            return this.command;
+            return command;
         }
 
         /// <summary>
@@ -60,7 +58,7 @@ namespace TwitchBot
         /// <returns>Returns the parameters</returns>
         public string[] GetParameters()
         {
-            return this.parameters;
+            return parameters;
         }
     }
 }

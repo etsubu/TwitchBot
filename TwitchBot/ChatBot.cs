@@ -1,12 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TwitchBot
 {
-    class ChatBot
+    internal class ChatBot
     {
-        private IRC irc;
+        private readonly IRC irc;
+
+        /// <summary>
+        /// Initializes ChatBot
+        /// </summary>
+        public ChatBot()
+        {
+            irc = new IRC();
+            irc.MessageReceivedEvent += MessageReceived;
+            irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", /*OAUTH KEY HERE*/"");
+            irc.JoinChannel("#nagrodus");
+            irc.SendMessage("Hello world", "#nagrodus");
+        }
 
         /// <summary>
         /// Called when the an IRC message is received
@@ -15,18 +25,6 @@ namespace TwitchBot
         public void MessageReceived(ChatMessage message)
         {
             Console.WriteLine(message.GetCommand());
-        }
-
-        /// <summary>
-        /// Initializes ChatBot
-        /// </summary>
-        public ChatBot()
-        {
-            this.irc = new IRC();
-            this.irc.MessageReceivedEvent += MessageReceived;
-            this.irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", /*OAUTH KEY HERE*/"");
-            this.irc.JoinChannel("#nagrodus");
-            this.irc.SendMessage("Hello world", "#nagrodus");
         }
     }
 }
