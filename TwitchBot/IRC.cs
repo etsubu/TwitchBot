@@ -24,6 +24,8 @@ namespace TwitchBot
         /// </summary>
         /// <param name="host">Address of the server</param>
         /// <param name="port">Port to connect to</param>
+        /// <param name="user">Username to use</param>
+        /// <param name="password">Password of the user</param>
         /// <returns></returns>
         public bool ConnectServer(string host, int port, string user, string password)
         {
