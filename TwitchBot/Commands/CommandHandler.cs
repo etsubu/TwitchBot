@@ -20,6 +20,7 @@ namespace TwitchBot.Commands
         {
             this.irc = irc;
             this.commands = new Dictionary<string, Command>();
+
             InitCommands();
         }
 
@@ -41,24 +42,25 @@ namespace TwitchBot.Commands
         {
             if (line.Length < 2 || line[0] != '!')
                 return false;
+
             line = line.Substring(1);
             int index = line.IndexOf(" ");
             Command cmd;
+
             lock (this.commands)
             {
                 if (index == -1)
-                {
                     cmd = this.commands[line];
-                }
                 else
-                {
                     cmd = this.commands[line.Substring(0, index)];
-                }
+
                 if (cmd == null)
                     return false;
+
                 Console.WriteLine("Processing");
                 irc.SendMessage(cmd.Process(line), "#nagrodus");
             }
+
             return true;
         }
 
@@ -87,9 +89,11 @@ namespace TwitchBot.Commands
             {
                 if (this.commands.ContainsKey(key))
                     return false;
+
                 BasicCommand cmd = new BasicCommand(key, response);
                 this.commands[cmd.GetName()] = cmd;
             }
+
             return true;
         }
     }

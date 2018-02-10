@@ -49,10 +49,9 @@ namespace TwitchBot.Commands
         /// <returns>True if the command belongs to this command, false if not</returns>
         public bool BelongsTo(string line)
         {
-            if(line.Length > 1)
-            {
+            if (line.Length > 1)
                 return line.StartsWith(line);
-            }
+
             return false;
         }
 

@@ -28,8 +28,9 @@ namespace TwitchBot.Commands
         /// <returns>Static response to the command or null if the line does not belong to this command</returns>
         public override string Process(string line)
         {
-            if(BelongsTo(line))
+            if (BelongsTo(line))
                 return this.response;
+
             return null;
         }
     }

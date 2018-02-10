@@ -7,14 +7,14 @@ namespace TwitchBot.Commands
     /// <summary>
     /// MetaCommand handles modifying, adding, removing and listing of the existing commands
     /// </summary>
-    internal class MetaCommand:Command
+    internal class MetaCommand : Command
     {
         private readonly CommandHandler handler;
 
         /// <summary>
         /// Initializes MetaCommand
         /// </summary>
-        public MetaCommand(CommandHandler handler):base("command")
+        public MetaCommand(CommandHandler handler) : base("command")
         {
             this.handler = handler;
         }
@@ -34,17 +34,14 @@ namespace TwitchBot.Commands
             string[] parts = line.Split(" ");
             if (parts.Length < 2)
                 return "";
-            if(parts[1].Equals("list"))
-            {
+
+            if (parts[1].Equals("list"))
                 ListCommands();
-            }
-            else if(parts[1].Equals("add") && parts.Length >2)
-            {
+            else if (parts[1].Equals("add") && parts.Length > 2)
+                throw new NotImplementedException();
+            else if (parts[1].Equals("remove") && parts.Length == 3)
+                throw new NotImplementedException();
 
-            } else if(parts[1].Equals("remove") && parts.Length == 3)
-            {
-
-            }
             return "";
         }
     }
