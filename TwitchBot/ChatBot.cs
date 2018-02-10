@@ -33,7 +33,7 @@ namespace TwitchBot
             this.irc = new IRC();
             this.commands = new CommandHandler(this.irc, "nagrodus");
             this.irc.MessageReceivedEvent += MessageReceived;
-            this.irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", /*OAUTH KEY HERE*/"oauth:aleazsgff11np3zxw1wjz62fmrjfhz");
+            this.irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", /*OAUTH KEY HERE*/"");
             this.irc.JoinChannel("#nagrodus");
             this.irc.SendMessage("Hello world", "#nagrodus");
         }
