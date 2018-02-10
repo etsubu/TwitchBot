@@ -116,7 +116,7 @@ namespace TwitchBot.Commands
                     return false;
 
                 //Built in commands are not removeable
-                if (commands[key].IsRemoveable())
+                if (commands[key].IsRemoveable)
                     return commands.Remove(key);
 
                 return false;

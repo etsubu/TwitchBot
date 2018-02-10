@@ -9,6 +9,12 @@ namespace TwitchBot.Commands
     /// </summary>
     internal class MetaCommand : Command
     {
+        /// <summary>
+        /// MetaCommand cannot be removed by users
+        /// </summary>
+        /// <returns>False</returns>
+        public override bool IsRemoveable => false;
+
         private readonly CommandHandler handler;
 
         /// <summary>
@@ -50,15 +56,6 @@ namespace TwitchBot.Commands
             }
 
             return "Invalid command.";
-        }
-
-        /// <summary>
-        /// MetaCommand cannot be removed by users
-        /// </summary>
-        /// <returns>False</returns>
-        public override bool IsRemoveable()
-        {
-            return false;
         }
     }
 }

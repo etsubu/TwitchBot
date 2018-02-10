@@ -9,6 +9,12 @@ namespace TwitchBot.Commands
     /// </summary>
     internal class BasicCommand : Command
     {
+        /// <summary>
+        /// BasicCommand can be removed by the user
+        /// </summary>
+        /// <returns>True</returns>
+        public override bool IsRemoveable => true;
+
         private readonly string response;
 
         /// <summary>
@@ -20,12 +26,6 @@ namespace TwitchBot.Commands
         {
             this.response = response;
         }
-
-        /// <summary>
-        /// BasicCommand can be removed by the user
-        /// </summary>
-        /// <returns>True</returns>
-        public override bool IsRemoveable() => true;
 
         /// <summary>
         /// Checks if the line belongs to this command and processes it if it does

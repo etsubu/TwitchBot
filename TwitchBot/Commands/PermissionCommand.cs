@@ -9,6 +9,12 @@ namespace TwitchBot.Commands
     /// </summary>
     internal class PermissionCommand : Command
     {
+        /// <summary>
+        /// PermissionCommand is not removeable
+        /// </summary>
+        /// <returns>False</returns>
+        public override bool IsRemoveable => false;
+
         public const int MaxPermission = 10;
         private readonly Dictionary<string, int> permissions;
 
@@ -19,12 +25,6 @@ namespace TwitchBot.Commands
         {
             permissions = new Dictionary<string, int>();
         }
-
-        /// <summary>
-        /// PermissionCommand is not removeable
-        /// </summary>
-        /// <returns>False</returns>
-        public override bool IsRemoveable() => false;
 
         /// <summary>
         /// Queries the permission level for the given user. Undefined users have permission level of 0

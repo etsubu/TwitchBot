@@ -10,6 +10,12 @@ namespace TwitchBot.Commands
     internal abstract class Command
     {
         /// <summary>
+        /// Used to check if the command can be removed by the user
+        /// </summary>
+        /// <returns>True if the command can be removed, false if not</returns>
+        public abstract bool IsRemoveable { get; }
+
+        /// <summary>
         /// The name of this command
         /// </summary>
         /// <returns>Returns the identifier part for the command</returns>
@@ -64,11 +70,5 @@ namespace TwitchBot.Commands
         /// <param name="permission">Permission level of the sender</param>
         /// <returns>String to send as a response</returns>
         public abstract string Process(string line);
-
-        /// <summary>
-        /// Used to check if the command can be removed by the user
-        /// </summary>
-        /// <returns>True if the command can be removed, false if not</returns>
-        public abstract bool IsRemoveable();
     }
 }
