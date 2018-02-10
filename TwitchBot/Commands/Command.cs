@@ -55,10 +55,7 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="permission">Permission level to check against</param>
         /// <returns>True if the given permission is enough, false if not</returns>
-        public bool HasPermission(int permission)
-        {
-            return permission >= requiredPermission;
-        }
+        public bool HasPermission(int permission) => permission >= requiredPermission;
 
         /// <summary>
         /// Processes the command

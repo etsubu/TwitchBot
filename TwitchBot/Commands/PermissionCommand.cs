@@ -24,10 +24,7 @@ namespace TwitchBot.Commands
         /// PermissionCommand is not removeable
         /// </summary>
         /// <returns>False</returns>
-        public override bool IsRemoveable()
-        {
-            return false;
-        }
+        public override bool IsRemoveable() => false;
 
         /// <summary>
         /// Queries the permission level for the given user. Undefined users have permission level of 0

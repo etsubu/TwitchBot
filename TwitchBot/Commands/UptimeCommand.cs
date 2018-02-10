@@ -23,10 +23,7 @@ namespace TwitchBot.Commands
         /// UptimeCommand is not removeable
         /// </summary>
         /// <returns>False</returns>
-        public override bool IsRemoveable()
-        {
-            return false;
-        }
+        public override bool IsRemoveable() => false;
 
         /// <summary>
         /// Calculates the time this program has been running
