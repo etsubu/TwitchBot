@@ -30,9 +30,9 @@ namespace TwitchBot.Commands
             meta = new MetaCommand(this);
             uptime = new UptimeCommand();
             permission = new PermissionCommand();
-            commands.Add(meta.GetName(), meta);
-            commands.Add(uptime.GetName(), uptime);
-            commands.Add(permission.GetName(), permission);
+            commands.Add(meta.Name, meta);
+            commands.Add(uptime.Name, uptime);
+            commands.Add(permission.Name, permission);
 
             //Channel owner always has max permission by default
             permission.SetPermission(this.channelOwner, PermissionCommand.MaxPermission);
@@ -138,7 +138,7 @@ namespace TwitchBot.Commands
                     return false;
 
                 BasicCommand cmd = new BasicCommand(key, response);
-                commands[cmd.GetName()] = cmd;
+                commands[cmd.Name] = cmd;
             }
 
             return true;

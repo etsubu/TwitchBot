@@ -9,6 +9,12 @@ namespace TwitchBot.Commands
     /// </summary>
     internal abstract class Command
     {
+        /// <summary>
+        /// The name of this command
+        /// </summary>
+        /// <returns>Returns the identifier part for the command</returns>
+        public string Name => name;
+
         private readonly string name;
         private readonly int requiredPermission;
 
@@ -31,15 +37,6 @@ namespace TwitchBot.Commands
         {
             this.name = name;
             this.requiredPermission = requiredPermission;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>Returns the identifier part for the command</returns>
-        public string GetName()
-        {
-            return name;
         }
 
         /// <summary>
