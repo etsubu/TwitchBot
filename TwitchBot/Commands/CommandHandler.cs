@@ -73,7 +73,7 @@ namespace TwitchBot.Commands
                 return false;
 
             line = line.Substring(1);
-            int index = line.IndexOf(" ");
+            int index = line.IndexOf(" ", StringComparison.Ordinal);
 
             lock (commands)
             {
