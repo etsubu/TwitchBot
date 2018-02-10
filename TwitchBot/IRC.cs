@@ -63,7 +63,7 @@ namespace TwitchBot
         /// <param name="message">IRC message to send</param>
         public void SendMessage(string message)
         {
-            writer.Write(message + "\r\n");
+            writer.Write($"{message}\r\n");
             writer.Flush();
         }
 
@@ -74,9 +74,10 @@ namespace TwitchBot
         /// <param name="channel">Channel to send the message to</param>
         public void SendMessage(string message, string channel)
         {
-            writer.Write("PRIVMSG " + channel + " :" + message + "\r\n");
+            writer.Write($"PRIVMSG {channel} :{message}\r\n");
             writer.Flush();
         }
+
         /// <summary>
         /// Reads all the incoming IRC messages
         /// </summary>
@@ -90,7 +91,7 @@ namespace TwitchBot
 
                 // Respond to pings
                 if (message.Command.Equals("PING"))
-                    SendMessage("PONG " + line.Substring(line.IndexOf("PING") + 5));
+                    SendMessage($"PONG {line.Substring(line.IndexOf("PING", StringComparison.Ordinal) + 5)}");
                 else
                     MessageReceivedEvent.Invoke(message);
             }
@@ -102,7 +103,7 @@ namespace TwitchBot
         /// <param name="channel">Name of the channel to join</param>
         public void JoinChannel(string channel)
         {
-            writer.Write("JOIN " + channel + "\r\n");
+            writer.Write($"JOIN {channel}\r\n");
             writer.Flush();
         }
 
