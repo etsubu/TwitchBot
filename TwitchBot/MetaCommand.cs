@@ -23,8 +23,9 @@ namespace TwitchBot
         /// Processes the given line
         /// </summary>
         /// <param name="line">Line to process</param>
+        /// <param name="sender">sender name</param>
         /// <returns></returns>
-        public override string Process(string line)
+        public override string Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)

@@ -32,8 +32,9 @@ namespace TwitchBot
         /// Calculates the time this program has been running
         /// </summary>
         /// <param name="line"></param>
+        /// <param name="sender">sender name</param>
         /// <returns>Running time in hours, minutes and seconds</returns>
-        public override string Process(string line)
+        public override string Process(string line, string sender)
         {
             string uptime;
             int diff = (Environment.TickCount - this.startTime) / 1000;

@@ -71,8 +71,9 @@ namespace TwitchBot
         /// </summary>
         /// <param name="line">Command line to process</param>
         /// <param name="permission">Permission level of the sender</param>
+        /// <param name="sender">Sender name</param>
         /// <returns>String to send as a response</returns>
-        public abstract string Process(string line);
+        public abstract string Process(string line, string sender);
 
         /// <summary>
         /// Used to check if the command can be removed by the user

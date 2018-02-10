@@ -15,7 +15,7 @@ namespace TwitchBot
         /// <summary>
         /// Initializes PermissionsCommand
         /// </summary>
-        public PermissionCommand():base("permission")
+        public PermissionCommand():base("permission", 1)
         {
             this.permissions = new Dictionary<string, int>();
         }
@@ -61,8 +61,9 @@ namespace TwitchBot
         /// Processes updating or querying permissions of users
         /// </summary>
         /// <param name="line">Command line</param>
+        /// <param name="sender">sender name</param>
         /// <returns>Message telling the result of the command</returns>
-        public override string Process(string line)
+        public override string Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)
@@ -71,6 +72,11 @@ namespace TwitchBot
             {
                 if (!int.TryParse(parts[3], out int permission) || permission < 0 || permission > MAX_PERMISSION)
                     return "Illegal permission \"" + parts[3] + "\"";
+                int senderPermission = QueryPermission(sender);
+                int permissionFor = QueryPermission(parts[2]);
+                // User cannot give other a higher or same permission as his or lower someones whose permission is the same or higher as his
+                if (permission >= senderPermission || permissionFor >= senderPermission)
+                    return sender + " You lack the permission to do this";
                 SetPermission(parts[2], permission);
                 return "Permission for " + parts[2] + " set to " + permission;
             } else if(parts[1].Equals("query") && parts.Length == 3)
