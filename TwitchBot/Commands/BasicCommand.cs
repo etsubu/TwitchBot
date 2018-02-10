@@ -29,7 +29,7 @@ namespace TwitchBot.Commands
         public override string Process(string line)
         {
             if (BelongsTo(line))
-                return this.response;
+                return response;
 
             return null;
         }

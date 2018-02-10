@@ -19,7 +19,7 @@ namespace TwitchBot.Commands
         public Command(string name)
         {
             this.name = name;
-            this.requiredPermission = 0;
+            requiredPermission = 0;
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace TwitchBot.Commands
         /// <returns>Returns the identifier part for the command</returns>
         public string GetName()
         {
-            return this.name;
+            return name;
         }
 
         /// <summary>

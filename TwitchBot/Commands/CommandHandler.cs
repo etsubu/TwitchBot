@@ -19,7 +19,7 @@ namespace TwitchBot.Commands
         public CommandHandler(IRC irc)
         {
             this.irc = irc;
-            this.commands = new Dictionary<string, Command>();
+            commands = new Dictionary<string, Command>();
 
             InitCommands();
         }
@@ -30,7 +30,7 @@ namespace TwitchBot.Commands
         private void InitCommands()
         {
             BasicCommand cmd = new BasicCommand("hello", "hoihoi");
-            this.commands.Add(cmd.GetName(), cmd);
+            commands.Add(cmd.GetName(), cmd);
         }
 
         /// <summary>
@@ -47,12 +47,12 @@ namespace TwitchBot.Commands
             int index = line.IndexOf(" ");
             Command cmd;
 
-            lock (this.commands)
+            lock (commands)
             {
                 if (index == -1)
-                    cmd = this.commands[line];
+                    cmd = commands[line];
                 else
-                    cmd = this.commands[line.Substring(0, index)];
+                    cmd = commands[line.Substring(0, index)];
 
                 if (cmd == null)
                     return false;
@@ -71,9 +71,9 @@ namespace TwitchBot.Commands
         /// <returns>True if the command was removed, false if it did not exist</returns>
         public bool RemoveCommand(string key)
         {
-            lock(this.commands)
+            lock(commands)
             {
-                return this.commands.Remove(key);
+                return commands.Remove(key);
             }
         }
 
@@ -85,13 +85,13 @@ namespace TwitchBot.Commands
         /// <returns>True if the command was added, false if the given command already exists</returns>
         public bool AddCommand(string key, string response)
         {
-            lock(this.commands)
+            lock(commands)
             {
-                if (this.commands.ContainsKey(key))
+                if (commands.ContainsKey(key))
                     return false;
 
                 BasicCommand cmd = new BasicCommand(key, response);
-                this.commands[cmd.GetName()] = cmd;
+                commands[cmd.GetName()] = cmd;
             }
 
             return true;
