@@ -11,17 +11,31 @@ namespace TwitchBot.Commands
     {
         private readonly Dictionary<string, Command> commands;
         private readonly IRC irc;
+        private readonly MetaCommand meta;
+        private readonly UptimeCommand uptime;
+        private readonly PermissionCommand permission;
+        private readonly string channelOwner;
 
         /// <summary>
         /// Initializes CommandHandler
         /// </summary>
         /// <param name="irc">IRC object to use for sending messages</param>
-        public CommandHandler(IRC irc)
+        /// <param name="channelOwner">Name of the channel owner</param>
+        public CommandHandler(IRC irc, string channelOwner)
         {
             this.irc = irc;
+            this.channelOwner = channelOwner;
             commands = new Dictionary<string, Command>();
 
-            InitCommands();
+            meta = new MetaCommand(this);
+            uptime = new UptimeCommand();
+            permission = new PermissionCommand();
+            commands.Add(meta.GetName(), meta);
+            commands.Add(uptime.GetName(), uptime);
+            commands.Add(permission.GetName(), permission);
+
+            //Channel owner always has max permission by default
+            permission.SetPermission(this.channelOwner, PermissionCommand.MAX_PERMISSION);
         }
 
         /// <summary>
@@ -29,36 +43,61 @@ namespace TwitchBot.Commands
         /// </summary>
         private void InitCommands()
         {
-            BasicCommand cmd = new BasicCommand("hello", "hoihoi");
-            commands.Add(cmd.GetName(), cmd);
+        }
+
+        /// <summary>
+        /// Lists all the names of available commands
+        /// </summary>
+        /// <returns>List of command names</returns>
+        public string ListCommands()
+        {
+            string commandNames = "";
+            lock(commands)
+            {
+                foreach(string key in commands.Keys)
+                    commandNames += "!" + key + " ";
+            }
+            return commandNames;
         }
 
         /// <summary>
         /// Processes the given command
         /// </summary>
         /// <param name="line">Command line to process</param>
+        /// <param name="sender">Name of the user who sent the command</param>
+        /// <param name="channel">channel the message was sent to</param>
         /// <returns>True if the command was processed, false if failed</returns>
-        public bool ProcessCommand(string line)
+        public bool ProcessCommand(string line, string sender, string channel)
         {
             if (line.Length < 2 || line[0] != '!')
                 return false;
 
             line = line.Substring(1);
             int index = line.IndexOf(" ");
-            Command cmd;
 
             lock (commands)
             {
+                //Parse command name
+                string name;
                 if (index == -1)
-                    cmd = commands[line];
+                    name = line;
                 else
-                    cmd = commands[line.Substring(0, index)];
+                    name = line.Substring(0, index);
 
-                if (cmd == null)
+                if (!commands.ContainsKey(name))
+                {
+                    irc.SendMessage("Unknown command", channel);
                     return false;
+                }
 
-                Console.WriteLine("Processing");
-                irc.SendMessage(cmd.Process(line), "#nagrodus");
+                //Check if the sender has permission to use the requested command
+                if (!commands[name].HasPermission(permission.QueryPermission(sender)))
+                {
+                    irc.SendMessage(sender + " You lack the permission to use this command", channel);
+                    return false;
+                }
+                //Execute the command and send the response
+                irc.SendMessage(commands[name].Process(line), channel);
             }
 
             return true;
@@ -73,7 +112,14 @@ namespace TwitchBot.Commands
         {
             lock(commands)
             {
-                return commands.Remove(key);
+                if (!commands.ContainsKey(key))
+                    return false;
+
+                //Built in commands are not removeable
+                if (commands[key].IsRemoveable())
+                    return commands.Remove(key);
+
+                return false;
             }
         }
 
@@ -87,6 +133,7 @@ namespace TwitchBot.Commands
         {
             lock(commands)
             {
+                //Only add the command if it doesn't already exist
                 if (commands.ContainsKey(key))
                     return false;
 

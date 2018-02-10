@@ -26,12 +26,12 @@ namespace TwitchBot
             this.trailing = trailing;
             this.parameters = parameters;
             this.username = null;
-            if(command.Equals("PRIVMSG") && prefix.Length > 1 && prefix[0] == ':')
+            if(command.Equals("PRIVMSG") && prefix.Length > 0)
             {
                 int nameEndIndex = prefix.IndexOf("!");
                 if(nameEndIndex != -1)
                 {
-                    this.username = prefix.Substring(1, nameEndIndex - 1);
+                    this.username = prefix.Substring(0, nameEndIndex);
                 }
             }
         }

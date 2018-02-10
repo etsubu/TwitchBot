@@ -14,14 +14,9 @@ namespace TwitchBot.Commands
         /// <summary>
         /// Initializes MetaCommand
         /// </summary>
-        public MetaCommand(CommandHandler handler) : base("command")
+        public MetaCommand(CommandHandler handler) : base("command", 1)
         {
             this.handler = handler;
-        }
-
-        private void ListCommands()
-        {
-
         }
 
         /// <summary>
@@ -33,16 +28,37 @@ namespace TwitchBot.Commands
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)
-                return "";
+                return "Invalid command.";
 
             if (parts[1].Equals("list"))
-                ListCommands();
-            else if (parts[1].Equals("add") && parts.Length > 2)
-                throw new NotImplementedException();
-            else if (parts[1].Equals("remove") && parts.Length == 3)
-                throw new NotImplementedException();
+                return handler.ListCommands();
 
-            return "";
+            if (parts[1].Equals("add") && parts.Length > 3)
+            {
+                if (handler.AddCommand(parts[2], string.Join(' ', parts, 3, parts.Length - 3)))
+                    return "Command was successfully added.";
+
+                return "Failed to add command.";
+            }
+
+            if (parts[1].Equals("remove") && parts.Length == 3)
+            {
+                if (handler.RemoveCommand(parts[2]))
+                    return "Command was successfully removed.";
+
+                return "Could not remove command.";
+            }
+
+            return "Invalid command.";
+        }
+
+        /// <summary>
+        /// MetaCommand cannot be removed by users
+        /// </summary>
+        /// <returns>False</returns>
+        public override bool IsRemoveable()
+        {
+            return false;
         }
     }
 }

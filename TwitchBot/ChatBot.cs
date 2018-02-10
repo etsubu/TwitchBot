@@ -18,11 +18,11 @@ namespace TwitchBot
         {
             Console.WriteLine(message.GetCommand());
             
-            if(message.GetCommand().Equals("PRIVMSG"))
+            if(message.GetCommand().Equals("PRIVMSG") && message.GetUsername() != null)
             {
                 //Console.WriteLine(message.);
                 string line = message.GetTrailing();
-                this.commands.ProcessCommand(line);
+                this.commands.ProcessCommand(line, message.GetUsername().ToLower(), message.GetParameters()[0]);
             }
         }
 
@@ -32,7 +32,7 @@ namespace TwitchBot
         public ChatBot()
         {
             this.irc = new IRC();
-            this.commands = new CommandHandler(this.irc);
+            this.commands = new CommandHandler(this.irc, "nagrodus");
             this.irc.MessageReceivedEvent += MessageReceived;
             this.irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", /*OAUTH KEY HERE*/"");
             this.irc.JoinChannel("#nagrodus");

@@ -56,10 +56,27 @@ namespace TwitchBot.Commands
         }
 
         /// <summary>
+        /// Checks if the given permission level is enough to use this command
+        /// </summary>
+        /// <param name="permission">Permission level to check against</param>
+        /// <returns>True if the given permission is enough, false if not</returns>
+        public bool HasPermission(int permission)
+        {
+            return permission >= this.requiredPermission;
+        }
+
+        /// <summary>
         /// Processes the command
         /// </summary>
         /// <param name="line">Command line to process</param>
+        /// <param name="permission">Permission level of the sender</param>
         /// <returns>String to send as a response</returns>
         public abstract string Process(string line);
+
+        /// <summary>
+        /// Used to check if the command can be removed by the user
+        /// </summary>
+        /// <returns>True if the command can be removed, false if not</returns>
+        public abstract bool IsRemoveable();
     }
 }
