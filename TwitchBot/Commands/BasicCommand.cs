@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TwitchBot
+namespace TwitchBot.Commands
 {
     /// <summary>
     /// BasicCommand defines a simple Command-Response behaviour where the response value is static

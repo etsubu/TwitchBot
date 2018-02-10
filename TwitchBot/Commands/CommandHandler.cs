@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TwitchBot
+namespace TwitchBot.Commands
 {
     /// <summary>
     /// Processes all the commands sent for the bot

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TwitchBot
+namespace TwitchBot.Commands
 {
     /// <summary>
     /// Defines a single command
