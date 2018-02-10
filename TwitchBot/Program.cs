@@ -3,7 +3,7 @@
     /// <summary>
     /// Initializes the program
     /// </summary>
-    class Init
+    internal class Program
     {
         /// <summary>
         /// Main method of the program
