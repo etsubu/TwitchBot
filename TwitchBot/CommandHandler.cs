@@ -14,6 +14,7 @@ namespace TwitchBot
         private MetaCommand meta;
         private UptimeCommand uptime;
         private PermissionCommand permission;
+        private BroadcastCommand broadcast;
         private string channelOwner;
 
         /// <summary>
@@ -37,9 +38,11 @@ namespace TwitchBot
             this.meta = new MetaCommand(this);
             this.uptime = new UptimeCommand();
             this.permission = new PermissionCommand();
+            this.broadcast = new BroadcastCommand(this.irc, "#" + this.channelOwner);
             this.commands.Add(this.meta.GetName(), this.meta);
             this.commands.Add(this.uptime.GetName(), this.uptime);
             this.commands.Add(this.permission.GetName(), this.permission);
+            this.commands.Add(this.broadcast.GetName(), this.broadcast);
 
             //Channel owner always has max permission by default
             this.permission.SetPermission(this.channelOwner, PermissionCommand.MAX_PERMISSION);
@@ -98,7 +101,7 @@ namespace TwitchBot
                     return false;
                 }
                 //Execute the command and send the response
-                irc.SendMessage(this.commands[name].Process(line), channel);
+                irc.SendMessage(this.commands[name].Process(line, sender), channel);
             }
             return true;
         }
