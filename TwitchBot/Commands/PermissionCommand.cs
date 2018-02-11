@@ -49,7 +49,7 @@ namespace TwitchBot.Commands
         /// <param name="permission">Permission level to set</param>
         public void SetPermission(string name, int permission)
         {
-            lock(permissions)
+            lock (permissions)
             {
                 permissions[name] = permission;
             }

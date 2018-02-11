@@ -55,10 +55,9 @@ namespace TwitchBot
             if (command.Equals("PRIVMSG") && prefix.Length > 0)
             {
                 int nameEndIndex = prefix.IndexOf("!", StringComparison.Ordinal);
+
                 if (nameEndIndex != -1)
-                {
                     Username = prefix.Substring(0, nameEndIndex);
-                }
             }
         }
     }

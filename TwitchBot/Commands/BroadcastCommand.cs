@@ -11,11 +11,11 @@ namespace TwitchBot.Commands
     {
         public override bool IsRemoveable => false;
 
-        private IRC irc;
-        private List<BroadcastMessage> messages;
-        private Timer timer;
+        private readonly IRC irc;
+        private readonly List<BroadcastMessage> messages;
+        private readonly Timer timer;
         private int tickCount;
-        private string channel;
+        private readonly string channel;
 
         /// <summary>
         /// Initializes the BroadcastCommand
@@ -26,12 +26,12 @@ namespace TwitchBot.Commands
         {
             this.irc = irc;
             this.channel = channel;
-            this.tickCount = 0;
-            this.timer = new Timer(1000);
-            this.messages = new List<BroadcastMessage>();
-            this.timer.Elapsed += OnTimerTick;
-            this.timer.AutoReset = true;
-            this.timer.Enabled = true;
+            tickCount = 0;
+            timer = new Timer(1000);
+            messages = new List<BroadcastMessage>();
+            timer.Elapsed += OnTimerTick;
+            timer.AutoReset = true;
+            timer.Enabled = true;
         }
 
         /// <summary>
@@ -41,18 +41,19 @@ namespace TwitchBot.Commands
         /// <param name="e">Ununsed</param>
         private void OnTimerTick(Object source, ElapsedEventArgs e)
         {
-            lock (this.messages)
+            lock (messages)
             {
-                foreach (BroadcastMessage message in this.messages)
+                foreach (BroadcastMessage message in messages)
                 {
-                    if(message.IsTiming(this.tickCount))
+                    if (message.IsTiming(tickCount))
                     {
-                        this.irc.SendMessage(message.GetMessage(), this.channel);
+                        irc.SendMessage(message.GetMessage(), channel);
                     }
                 }
             }
-            this.tickCount++;
-            Console.WriteLine(this.tickCount);
+
+            tickCount++;
+            Console.WriteLine(tickCount);
         }
 
         /// <summary>
@@ -63,14 +64,14 @@ namespace TwitchBot.Commands
         private bool AddBroadcast(string[] parts)
         {
             if (!int.TryParse(parts[2], out var delay))
-            {
                 return false;
-            }
+
             string message = string.Join(" ", parts, 3, parts.Length - 3);
-            lock (this.messages)
+            lock (messages)
             {
-                this.messages.Add(new BroadcastMessage(delay, message));
+                messages.Add(new BroadcastMessage(delay, message));
             }
+
             return true;
         }
 
@@ -84,35 +85,30 @@ namespace TwitchBot.Commands
             // If no index was given remove the latest
             if (parts.Length == 2)
             {
-                lock (this.messages)
+                lock (messages)
                 {
-                    if (this.messages.Count == 0)
-                    {
+                    if (messages.Count == 0)
                         return false;
-                    }
-                    lock (this.messages)
+
+                    lock (messages)
                     {
-                        this.messages.RemoveAt(this.messages.Count - 1);
+                        messages.RemoveAt(messages.Count - 1);
                     }
                     return true;
                 }
             }
-            else
+
+            if (!int.TryParse(parts[2], out var index) || index < 1)
+                return false;
+
+            index--;
+            lock (messages)
             {
-                if (!int.TryParse(parts[2], out var index) || index < 1)
-                {
+                if (index >= messages.Count)
                     return false;
-                }
-                index--;
-                lock (this.messages)
-                {
-                    if (index >= this.messages.Count)
-                    {
-                        return false;
-                    }
-                    this.messages.RemoveAt(index);
-                    return true;
-                }
+
+                messages.RemoveAt(index);
+                return true;
             }
         }
 
@@ -122,14 +118,16 @@ namespace TwitchBot.Commands
         /// <returns>All the broadcast messages</returns>
         private string ListBroadcasts()
         {
+            // TODO: use strinbguilder
             string broadcasts = "";
-            lock (this.messages)
+            lock (messages)
             {
-                if (this.messages.Count == 0)
+                if (messages.Count == 0)
                     return "There are no broadcast messages";
-                for (int i = 0; i < this.messages.Count; i++)
+
+                for (int i = 0; i < messages.Count; i++)
                 {
-                    broadcasts += (i + 1) + ". (" + this.messages[i].GetDelay() + " seconds): " + this.messages[i].GetMessage() + " _______ ";
+                    broadcasts += (i + 1) + ". (" + messages[i].GetDelay() + " seconds): " + messages[i].GetMessage() + " _______ ";
                 }
             }
             return broadcasts;
@@ -146,22 +144,25 @@ namespace TwitchBot.Commands
             string[] parts = line.Split(" ");
             if (parts.Length < 2)
                 return "Invalid command";
-            if(parts[1].Equals("add") && parts.Length > 3)
+
+            if (parts[1].Equals("add") && parts.Length > 3)
             {
                 if (AddBroadcast(parts))
                     return "Broadcast message was added.";
-                else
-                    return "Failed to add broadcast message";
-            } else if(parts[1].Equals("remove"))
+
+                return "Failed to add broadcast message";
+            }
+
+            if (parts[1].Equals("remove"))
             {
                 if (RemoveBroadcast(parts))
                     return "Broadcast message was removed";
-                else
-                    return "Failed to remove broadcast message";
-            } else if(parts[1].Equals("list"))
-            {
-                return ListBroadcasts();
+                return "Failed to remove broadcast message";
             }
+
+            if (parts[1].Equals("list"))
+                return ListBroadcasts();
+
             return "Unknown command";
         }
     }

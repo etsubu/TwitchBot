@@ -177,6 +177,7 @@ namespace TwitchBot
                     parametersList.AddLast(tempParams.Substring(0, parametersStart));
                     tempParams = tempParams.Substring(parametersStart + 1);
                 }
+
                 parametersList.AddLast(tempParams);
                 parameters = parametersList.ToArray();
             }

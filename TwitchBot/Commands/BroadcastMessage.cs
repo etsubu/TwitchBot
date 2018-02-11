@@ -9,8 +9,8 @@ namespace TwitchBot.Commands
     /// </summary>
     internal class BroadcastMessage
     {
-        private int delay;
-        private string message;
+        private readonly int delay;
+        private readonly string message;
 
         /// <summary>
         /// Initializes BroadcastMessage
@@ -29,7 +29,7 @@ namespace TwitchBot.Commands
         /// <returns>The delay in seconds for this message to be sent</returns>
         public int GetDelay()
         {
-            return this.delay;
+            return delay;
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace TwitchBot.Commands
         /// <returns>The broadcasted message</returns>
         public string GetMessage()
         {
-            return this.message;
+            return message;
         }
 
         /// <summary>
@@ -46,9 +46,6 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="ticks">Current tick count</param>
         /// <returns>True if this message should be sent, false if not</returns>
-        public bool IsTiming(int ticks)
-        {
-            return (ticks % this.delay) == 0;
-        }
+        public bool IsTiming(int ticks) => ticks % delay == 0;
     }
 }

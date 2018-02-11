@@ -54,7 +54,7 @@ namespace TwitchBot.Commands
             commands.Add(broadcast.Name, broadcast);
 
             //Channel owner always has max permission by default
-            this.permission.SetPermission(this.channelOwner, PermissionCommand.MaxPermission);
+            permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
         }
 
         /// <summary>
@@ -63,6 +63,7 @@ namespace TwitchBot.Commands
         /// <returns>List of command names</returns>
         public string ListCommands()
         {
+            // TODO: use stringbuilder
             string commandNames = "";
             lock(commands)
             {
