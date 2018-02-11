@@ -63,14 +63,14 @@ namespace TwitchBot.Commands
         /// <returns>List of command names</returns>
         public string ListCommands()
         {
-            // TODO: use stringbuilder
-            string commandNames = "";
-            lock(commands)
+            var commandNames = new StringBuilder();
+            lock (commands)
             {
-                foreach(string key in commands.Keys)
-                    commandNames += "!" + key + " ";
+                foreach (var key in commands.Keys)
+                    commandNames.Append($"!{key} ");
             }
-            return commandNames;
+
+            return commandNames.ToString();
         }
 
         /// <summary>
