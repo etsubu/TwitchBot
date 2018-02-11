@@ -1,14 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using TwitchBot.Commands;
 
 namespace TwitchBot
 {
-    class ChatBot
+    internal class ChatBot : IDisposable
     {
-        private IRC irc;
+        private readonly IRC irc;
         private CommandHandler commands;
+
+        /// <summary>
+        /// Initializes ChatBot
+        /// </summary>
+        private ChatBot()
+        {
+            irc = new IRC();
+            irc.MessageReceivedEvent += MessageReceived;
+        }
+
+        public ChatBot(Configuration configuration) : this()
+        {
+            irc.ConnectServer(
+                configuration.Connection.Host,
+                configuration.Connection.Port,
+                configuration.Username,
+                configuration.OAuthToken);
+
+            foreach (var channel in configuration.Channels)
+            {
+                irc.JoinChannel(channel);
+                irc.SendMessage("Hello world", channel);
+            }
+        }
 
         /// <summary>
         /// Called when the an IRC message is received
@@ -16,27 +38,24 @@ namespace TwitchBot
         /// <param name="message">ChatMessage that contains the parsed message</param>
         public void MessageReceived(ChatMessage message)
         {
-            Console.WriteLine(message.GetCommand());
+            Console.WriteLine(message.Command);
             
-            if(message.GetCommand().Equals("PRIVMSG") && message.GetUsername() != null)
+            if (message.Command.Equals("PRIVMSG") && message.Username != null)
             {
                 //Console.WriteLine(message.);
-                string line = message.GetTrailing();
-                this.commands.ProcessCommand(line, message.GetUsername().ToLower(), message.GetParameters()[0]);
+                string line = message.Trailing;
+                commands.ProcessCommand(line, message.Username.ToLower(), message.Parameters[0]);
             }
         }
 
         /// <summary>
-        /// Initializes ChatBot
+        /// Synchronously waits for the IRC client to exit
         /// </summary>
-        public ChatBot()
+        public void WaitForExit() => irc.WaitForExit();
+
+        public void Dispose()
         {
-            this.irc = new IRC();
-            this.commands = new CommandHandler(this.irc, "nagrodus");
-            this.irc.MessageReceivedEvent += MessageReceived;
-            this.irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", /*OAUTH KEY HERE*/"oauth:aleazsgff11np3zxw1wjz62fmrjfhz");
-            this.irc.JoinChannel("#nagrodus");
-            this.irc.SendMessage("Hello world", "#nagrodus");
+            irc?.Dispose();
         }
     }
 }

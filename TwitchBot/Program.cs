@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace TwitchBot
+﻿namespace TwitchBot
 {
     /// <summary>
     /// Initializes the program
     /// </summary>
-    class Init
+    internal class Program
     {
         /// <summary>
         /// Main method of the program
@@ -13,7 +11,10 @@ namespace TwitchBot
         /// <param name="args">Currently unused</param>
         static void Main(string[] args)
         {
-            ChatBot bot = new ChatBot();
+            using (var bot = new ChatBot(Configuration.LoadFromJson("config.json")))
+            {
+                bot.WaitForExit();
+            }
         }
     }
 }
