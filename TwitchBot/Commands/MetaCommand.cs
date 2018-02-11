@@ -28,32 +28,32 @@ namespace TwitchBot.Commands
         /// <param name="line">Line to process</param>
         /// <param name="sender">sender name</param>
         /// <returns></returns>
-        public override string Process(string line, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)
-                return "Invalid command.";
+                return new CommandResult(false, "Invalid command.");
 
             if (parts[1].Equals("list"))
-                return Handler.ListCommands();
+                return new CommandResult(true, Handler.ListCommands());
 
             if (parts[1].Equals("add") && parts.Length > 3)
             {
                 if (Handler.AddCommand(parts[2], string.Join(' ', parts, 3, parts.Length - 3)))
-                    return "Command was successfully added.";
+                    return new CommandResult(true, "Command was successfully added.");
 
-                return "Failed to add command.";
+                return new CommandResult(false, "Failed to add command.");
             }
 
             if (parts[1].Equals("remove") && parts.Length == 3)
             {
                 if (Handler.RemoveCommand(parts[2]))
-                    return "Command was successfully removed.";
+                    return new CommandResult(true, "Command was successfully removed.");
 
-                return "Could not remove command.";
+                return new CommandResult(false, "Could not remove command.");
             }
 
-            return "Invalid command.";
+            return new CommandResult(false, "Invalid command.");
         }
     }
 }

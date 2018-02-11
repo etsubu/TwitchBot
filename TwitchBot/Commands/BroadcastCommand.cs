@@ -23,7 +23,8 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="irc">IRC object to use for sending broadcast messages</param>
         /// <param name="channel">Channel to send the broadcast messages to</param>
-        public BroadcastCommand(IRC irc, string channel):base("broadcast", 1)
+        /// <param name="handler">Unused by the BroadcastCommand</param>
+        public BroadcastCommand(IRC irc, string channel, CommandHandler handler):base(handler, "broadcast", 1)
         {
             this.irc = irc;
             this.channel = channel;
@@ -145,31 +146,31 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line</param>
         /// <param name="sender">Name of the sender</param>
         /// <returns>Response to the command</returns>
-        public override string Process(string line, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)
-                return "Invalid command";
+                return new CommandResult(false, "Invalid command");
 
             if (parts[1].Equals("add") && parts.Length > 3)
             {
                 if (AddBroadcast(parts))
-                    return "Broadcast message was added.";
+                    return new CommandResult(true, "Broadcast message was added.");
 
-                return "Failed to add broadcast message";
+                return new CommandResult(false, "Failed to add broadcast message");
             }
 
             if (parts[1].Equals("remove"))
             {
                 if (RemoveBroadcast(parts))
-                    return "Broadcast message was removed";
-                return "Failed to remove broadcast message";
+                    return new CommandResult(true, "Broadcast message was removed");
+                return new CommandResult(false, "Failed to remove broadcast message");
             }
 
             if (parts[1].Equals("list"))
-                return ListBroadcasts();
+                return new CommandResult(true, ListBroadcasts());
 
-            return "Unknown command";
+            return new CommandResult(false, "Unknown command");
         }
     }
 }
