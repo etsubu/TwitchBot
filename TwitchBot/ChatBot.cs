@@ -2,7 +2,7 @@
 
 namespace TwitchBot
 {
-    internal class ChatBot
+    internal class ChatBot : IDisposable
     {
         private readonly IRC irc;
 
@@ -25,6 +25,11 @@ namespace TwitchBot
         public void MessageReceived(ChatMessage message)
         {
             Console.WriteLine(message.Command);
+        }
+
+        public void Dispose()
+        {
+            irc?.Dispose();
         }
     }
 }

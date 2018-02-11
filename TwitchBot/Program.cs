@@ -11,7 +11,9 @@
         /// <param name="args">Currently unused</param>
         static void Main(string[] args)
         {
-            ChatBot bot = new ChatBot();
+            using (var bot = new ChatBot())
+            {
+            }
         }
     }
 }

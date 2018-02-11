@@ -10,7 +10,7 @@ namespace TwitchBot
     /// <summary>
     /// Minimalistic IRC implementation
     /// </summary>
-    internal class IRC
+    internal class IRC : IDisposable
     {
         private TcpClient client;
         private StreamReader reader;
@@ -18,6 +18,27 @@ namespace TwitchBot
         private Thread listenerThread;
         public delegate void MessageReceived(ChatMessage message);
         public event MessageReceived MessageReceivedEvent;
+
+        /// <summary>
+        /// Initialises a new IRC instance
+        /// </summary>
+        public IRC()
+        {
+
+        }
+
+        /// <summary>
+        /// Disposes the IRC instance. If the instance is connected to an IRC server, Disconnect() will be called
+        /// </summary>
+        public void Dispose()
+        {
+            if (client != null && client.Connected)
+                Disconnect();
+
+            client?.Dispose();
+            reader?.Dispose();
+            writer?.Dispose();
+        }
 
         /// <summary>
         /// Tries to connect to the IRC server
