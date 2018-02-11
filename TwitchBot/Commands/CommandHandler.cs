@@ -11,10 +11,6 @@ namespace TwitchBot.Commands
     {
         private readonly Dictionary<string, Command> commands;
         private readonly IRC irc;
-        private MetaCommand meta;
-        private UptimeCommand uptime;
-        private PermissionCommand permission;
-        private BroadcastCommand broadcast;
         private readonly string channelOwner;
 
         /// <summary>
@@ -28,34 +24,32 @@ namespace TwitchBot.Commands
             this.channelOwner = channelOwner;
             commands = new Dictionary<string, Command>();
 
-            meta = new MetaCommand(this);
-            uptime = new UptimeCommand();
-            permission = new PermissionCommand();
-            commands.Add(meta.Name, meta);
-            commands.Add(uptime.Name, uptime);
-            commands.Add(permission.Name, permission);
-
             //Channel owner always has max permission by default
             permission.SetPermission(this.channelOwner, PermissionCommand.MaxPermission);
+        }
+
+        private void RegisterCommand<TCommand>(Action<TCommand> commandConfiguration = null) where TCommand : Command
+        {
+            var instance = Activator.CreateInstance(typeof(TCommand), this);
         }
 
         /// <summary>
         /// Initializes the existing commands
         /// </summary>
-        private void InitCommands()
-        {
-            meta = new MetaCommand(this);
-            uptime = new UptimeCommand();
-            permission = new PermissionCommand();
-            broadcast = new BroadcastCommand(irc, "#" + channelOwner);
-            commands.Add(meta.Name, meta);
-            commands.Add(uptime.Name, uptime);
-            commands.Add(permission.Name, permission);
-            commands.Add(broadcast.Name, broadcast);
+        //private void InitCommands()
+        //{
+        //    meta = new MetaCommand(this);
+        //    uptime = new UptimeCommand();
+        //    permission = new PermissionCommand();
+        //    broadcast = new BroadcastCommand(irc, "#" + channelOwner);
+        //    commands.Add(meta.Name, meta);
+        //    commands.Add(uptime.Name, uptime);
+        //    commands.Add(permission.Name, permission);
+        //    commands.Add(broadcast.Name, broadcast);
 
-            //Channel owner always has max permission by default
-            permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
-        }
+        //    //Channel owner always has max permission by default
+        //    permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
+        //}
 
         /// <summary>
         /// Lists all the names of available commands

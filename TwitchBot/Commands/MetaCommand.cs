@@ -15,14 +15,11 @@ namespace TwitchBot.Commands
         /// <returns>False</returns>
         public override bool IsRemoveable => false;
 
-        private readonly CommandHandler handler;
-
         /// <summary>
         /// Initializes MetaCommand
         /// </summary>
-        public MetaCommand(CommandHandler handler) : base("command", 1)
+        public MetaCommand(CommandHandler handler) : base(handler, "command", 1)
         {
-            this.handler = handler;
         }
 
         /// <summary>
@@ -38,11 +35,11 @@ namespace TwitchBot.Commands
                 return "Invalid command.";
 
             if (parts[1].Equals("list"))
-                return handler.ListCommands();
+                return Handler.ListCommands();
 
             if (parts[1].Equals("add") && parts.Length > 3)
             {
-                if (handler.AddCommand(parts[2], string.Join(' ', parts, 3, parts.Length - 3)))
+                if (Handler.AddCommand(parts[2], string.Join(' ', parts, 3, parts.Length - 3)))
                     return "Command was successfully added.";
 
                 return "Failed to add command.";
@@ -50,7 +47,7 @@ namespace TwitchBot.Commands
 
             if (parts[1].Equals("remove") && parts.Length == 3)
             {
-                if (handler.RemoveCommand(parts[2]))
+                if (Handler.RemoveCommand(parts[2]))
                     return "Command was successfully removed.";
 
                 return "Could not remove command.";
