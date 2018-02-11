@@ -13,6 +13,7 @@
         {
             using (var bot = new ChatBot())
             {
+                bot.WaitForExit();
             }
         }
     }

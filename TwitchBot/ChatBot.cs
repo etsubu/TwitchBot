@@ -27,6 +27,11 @@ namespace TwitchBot
             Console.WriteLine(message.Command);
         }
 
+        /// <summary>
+        /// Synchronously waits for the IRC client to exit
+        /// </summary>
+        public void WaitForExit() => irc.WaitForExit();
+
         public void Dispose()
         {
             irc?.Dispose();

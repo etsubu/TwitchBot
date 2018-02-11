@@ -68,6 +68,11 @@ namespace TwitchBot
         }
 
         /// <summary>
+        /// Synchronously waits for the listener thread to exit
+        /// </summary>
+        public void WaitForExit() => listenerThread.Join();
+
+        /// <summary>
         /// Disconnects from the IRC server
         /// </summary>
         public void Disconnect()
@@ -104,7 +109,7 @@ namespace TwitchBot
         /// </summary>
         public void MessageReader()
         {
-            while(true)
+            while (true)
             {
                 string line = reader.ReadLine();
                 Console.WriteLine(line);
