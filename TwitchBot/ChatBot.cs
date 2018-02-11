@@ -9,13 +9,25 @@ namespace TwitchBot
         /// <summary>
         /// Initializes ChatBot
         /// </summary>
-        public ChatBot()
+        private ChatBot()
         {
             irc = new IRC();
             irc.MessageReceivedEvent += MessageReceived;
-            irc.ConnectServer("irc.twitch.tv", 6667, "nagrodusbot", /*OAUTH KEY HERE*/"");
-            irc.JoinChannel("#nagrodus");
-            irc.SendMessage("Hello world", "#nagrodus");
+        }
+
+        public ChatBot(Configuration configuration) : this()
+        {
+            irc.ConnectServer(
+                configuration.Connection.Host,
+                configuration.Connection.Port,
+                configuration.Username,
+                configuration.OAuthToken);
+
+            foreach (var channel in configuration.Channels)
+            {
+                irc.JoinChannel(channel);
+                irc.SendMessage("Hello world", channel);
+            }
         }
 
         /// <summary>
