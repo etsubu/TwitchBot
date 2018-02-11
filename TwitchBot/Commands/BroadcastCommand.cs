@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Timers;
 
 namespace TwitchBot.Commands
@@ -118,19 +119,24 @@ namespace TwitchBot.Commands
         /// <returns>All the broadcast messages</returns>
         private string ListBroadcasts()
         {
-            // TODO: use strinbguilder
-            string broadcasts = "";
+            var broadcasts = new StringBuilder();
             lock (messages)
             {
                 if (messages.Count == 0)
-                    return "There are no broadcast messages";
-
-                for (int i = 0; i < messages.Count; i++)
+                    broadcasts.Append("There are no broadcast messages");
+                else
                 {
-                    broadcasts += (i + 1) + ". (" + messages[i].GetDelay() + " seconds): " + messages[i].GetMessage() + " _______ ";
+                    var count = 1;
+                    foreach (var message in messages)
+                    {
+                        broadcasts.AppendLine(
+                            $"{count}. ({message.GetDelay()} seconds): {message.GetMessage()} _______ ");
+                        count += 1;
+                    }
                 }
             }
-            return broadcasts;
+
+            return broadcasts.ToString();
         }
 
         /// <summary>
