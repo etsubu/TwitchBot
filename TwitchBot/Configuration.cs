@@ -1,4 +1,19 @@
-﻿using System.IO;
+﻿/*
+ * Sample JSON configuration file:
+ *  {
+        "username": "",
+        "oauth": "oauth:---------------------",
+        "connection": {
+            "host": "irc.twitch.tv",
+            "port": 6667
+        },
+        "channels": [
+            ""
+        ] 
+    }
+ */
+
+using System.IO;
 using Newtonsoft.Json;
 
 namespace TwitchBot
