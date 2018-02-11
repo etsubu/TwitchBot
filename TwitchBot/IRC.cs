@@ -88,9 +88,9 @@ namespace TwitchBot
             while(true)
             {
                 string line = this.reader.ReadLine();
-                Console.WriteLine(line);
                 ChatMessage message = ParseMessage(line);
                 // Respond to pings
+                Console.WriteLine(line);
                 if (message.GetCommand().Equals("PING"))
                 {
                     SendMessage("PONG " + line.Substring(line.IndexOf("PING") + 5));
@@ -154,6 +154,7 @@ namespace TwitchBot
                     parametersList.AddLast(tempParams.Substring(0, parametersStart));
                     tempParams = tempParams.Substring(parametersStart + 1);
                 }
+                parametersList.AddLast(tempParams);
                 parameters = parametersList.ToArray();
             } else
             {
