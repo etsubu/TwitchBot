@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot.Commands
 {
@@ -9,51 +10,23 @@ namespace TwitchBot.Commands
     /// </summary>
     internal class PermissionCommand : Command
     {
+        public const int MaxPermission = 10;
+
         /// <summary>
         /// PermissionCommand is not removeable
         /// </summary>
         /// <returns>False</returns>
         public override bool IsRemoveable => false;
 
-        public const int MaxPermission = 10;
-        private readonly Dictionary<string, int> permissions;
+        private readonly PermissionManager permissionManager;
 
         /// <summary>
         /// Initializes PermissionsCommand
         /// <param name="handler">Ununsed by the PermissionCommand</param>
         /// </summary>
-        public PermissionCommand(CommandHandler handler) : base(handler, "permission")
+        public PermissionCommand(PermissionManager permissionManager, CommandHandler handler) : base(handler, "permission")
         {
-            permissions = new Dictionary<string, int>();
-        }
-
-        /// <summary>
-        /// Queries the permission level for the given user. Undefined users have permission level of 0
-        /// </summary>
-        /// <param name="name">User to query</param>
-        /// <returns>Permission level of 0 to 10</returns>
-        public int QueryPermission(string name)
-        {
-            lock(permissions)
-            {
-                if (permissions.ContainsKey(name))
-                    return permissions[name];
-
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Sets the given permission level for a user
-        /// </summary>
-        /// <param name="name">Name of the user to set permission level for</param>
-        /// <param name="permission">Permission level to set</param>
-        public void SetPermission(string name, int permission)
-        {
-            lock (permissions)
-            {
-                permissions[name] = permission;
-            }
+            this.permissionManager = permissionManager;
         }
 
         /// <summary>
@@ -62,24 +35,28 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line</param>
         /// <param name="sender">sender name</param>
         /// <returns>Message telling the result of the command</returns>
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string channel, string sender)
         {
             string[] parts = line.Split(" ");
 
             if (parts.Length < 2)
                 return new CommandResult(false, "Invalid command");
 
-            if (parts[1].Equals("set") && parts.Length == 4)
-            {
-                if (!int.TryParse(parts[3], out int permission) || permission < 0 || permission > MaxPermission)
-                    return new CommandResult(false, $"Illegal permission \"{parts[3]}\"");
+            var command = parts[1];
+            var name = parts[2];
+            var permissionString = parts[3];
 
-                SetPermission(parts[2], permission);
-                return new CommandResult(true, $"Permission for {parts[2]} set to {permission}");
+            if (command.Equals("set") && parts.Length == 4)
+            {
+                if (!int.TryParse(permissionString, out int permission) || permission < 0 || permission > MaxPermission)
+                    return new CommandResult(false, $"Illegal permission \"{permissionString}\"");
+
+                permissionManager.UpdatePermission(channel, name, permission);
+                return new CommandResult(true, $"Permission for {name} set to {permission}");
             }
 
-            if (parts[1].Equals("query") && parts.Length == 3)
-                return new CommandResult(true, $"Permission for {parts[2]} is {QueryPermission(parts[2])}");
+            if (command.Equals("query") && parts.Length == 3)
+                return new CommandResult(true, $"Permission for {name} is {permissionManager.QueryPermission(channel, name)}");
 
             return new CommandResult(false, "Invalid command");
         }

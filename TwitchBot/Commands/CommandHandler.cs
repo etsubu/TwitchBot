@@ -47,8 +47,9 @@ namespace TwitchBot.Commands
             provider.GetRequiredService<MetaCommand>();
             provider.GetRequiredService<UptimeCommand>();
             
-            var permission = provider.GetRequiredService<PermissionCommand>();
-            permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
+            // TODO: global permissions for PermissionManager
+            //var permission = provider.GetRequiredService<PermissionCommand>();
+            //permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
 
             foreach (var command in provider.GetServices<Command>())
                 commands.Add(command.Name, command);
