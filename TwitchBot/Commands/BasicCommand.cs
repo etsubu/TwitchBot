@@ -33,7 +33,7 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line to process</param>
         /// <param name="sender">sender name</param>
         /// <returns>Static response to the command</returns>
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string channel, string sender)
         {
             return new CommandResult(true, this.response);
         }
