@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TwitchBot.Commands
 {
@@ -11,10 +13,6 @@ namespace TwitchBot.Commands
     {
         private readonly Dictionary<string, Command> commands;
         private readonly IRC irc;
-        private MetaCommand meta;
-        private UptimeCommand uptime;
-        private PermissionCommand permission;
-        private BroadcastCommand broadcast;
         private readonly string channelOwner;
 
         /// <summary>
@@ -28,33 +26,28 @@ namespace TwitchBot.Commands
             this.channelOwner = channelOwner;
             commands = new Dictionary<string, Command>();
 
-            meta = new MetaCommand(this);
-            uptime = new UptimeCommand();
-            permission = new PermissionCommand();
-            commands.Add(meta.Name, meta);
-            commands.Add(uptime.Name, uptime);
-            commands.Add(permission.Name, permission);
+            var services = new ServiceCollection()
+                .AddSingleton(irc)
+                .AddSingleton<MetaCommand>()
+                .AddSingleton<UptimeCommand>()
+                .AddSingleton<PermissionCommand>()
+                .AddSingleton(srv => new BroadcastCommand(
+                    srv.GetRequiredService<IRC>(),
+                    "#" + channelOwner,
+                    this));
 
-            //Channel owner always has max permission by default
-            permission.SetPermission(this.channelOwner, PermissionCommand.MaxPermission);
-        }
+            var provider = services.BuildServiceProvider();
 
-        /// <summary>
-        /// Initializes the existing commands
-        /// </summary>
-        private void InitCommands()
-        {
-            meta = new MetaCommand(this);
-            uptime = new UptimeCommand();
-            permission = new PermissionCommand();
-            broadcast = new BroadcastCommand(irc, "#" + channelOwner);
-            commands.Add(meta.Name, meta);
-            commands.Add(uptime.Name, uptime);
-            commands.Add(permission.Name, permission);
-            commands.Add(broadcast.Name, broadcast);
-
-            //Channel owner always has max permission by default
+            // instantiate/initialise commands by fetching them from the DI provider
+            // BroadcastCommand is instantiated when its added as a singleton
+            provider.GetRequiredService<MetaCommand>();
+            provider.GetRequiredService<UptimeCommand>();
+            
+            var permission = provider.GetRequiredService<PermissionCommand>();
             permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
+
+            foreach (var command in provider.GetServices<Command>())
+                commands.Add(command.Name, command);
         }
 
         /// <summary>
@@ -104,13 +97,13 @@ namespace TwitchBot.Commands
                 }
 
                 //Check if the sender has permission to use the requested command
-                if (!commands[name].HasPermission(permission.QueryPermission(sender)))
-                {
-                    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
-                    return false;
-                }
+                //if (!commands[name].HasPermission(permission.QueryPermission(sender)))
+                //{
+                //    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
+                //    return false;
+                //}
                 //Execute the command and send the response
-                irc.SendMessage(commands[name].Process(line, sender), channel);
+                irc.SendMessage(commands[name].Process(line, sender).Response, channel);
             }
 
             return true;
@@ -150,7 +143,7 @@ namespace TwitchBot.Commands
                 if (commands.ContainsKey(key))
                     return false;
 
-                BasicCommand cmd = new BasicCommand(key, response);
+                BasicCommand cmd = new BasicCommand(key, response, this);
                 commands[cmd.Name] = cmd;
             }
 

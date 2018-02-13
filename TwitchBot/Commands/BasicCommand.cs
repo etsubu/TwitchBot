@@ -22,7 +22,7 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="name">Name/Identifier that belongs to this command</param>
         /// <param name="response">Statis response when this command is called</param>
-        public BasicCommand(string name, string response) : base(name)
+        public BasicCommand(string name, string response, CommandHandler handler) : base(handler, name)
         {
             this.response = response;
         }
@@ -32,13 +32,10 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="line">Command line to process</param>
         /// <param name="sender">sender name</param>
-        /// <returns>Static response to the command or null if the line does not belong to this command</returns>
-        public override string Process(string line, string sender)
+        /// <returns>Static response to the command</returns>
+        public override CommandResult Process(string line, string sender)
         {
-            if (BelongsTo(line))
-                return response;
-
-            return null;
+            return new CommandResult(true, this.response);
         }
     }
 }

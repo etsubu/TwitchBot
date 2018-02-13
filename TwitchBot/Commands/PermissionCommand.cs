@@ -20,8 +20,9 @@ namespace TwitchBot.Commands
 
         /// <summary>
         /// Initializes PermissionsCommand
+        /// <param name="handler">Ununsed by the PermissionCommand</param>
         /// </summary>
-        public PermissionCommand() : base("permission")
+        public PermissionCommand(CommandHandler handler) : base(handler, "permission")
         {
             permissions = new Dictionary<string, int>();
         }
@@ -61,26 +62,26 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line</param>
         /// <param name="sender">sender name</param>
         /// <returns>Message telling the result of the command</returns>
-        public override string Process(string line, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
 
             if (parts.Length < 2)
-                return "Invalid command";
+                return new CommandResult(false, "Invalid command");
 
             if (parts[1].Equals("set") && parts.Length == 4)
             {
                 if (!int.TryParse(parts[3], out int permission) || permission < 0 || permission > MaxPermission)
-                    return $"Illegal permission \"{parts[3]}\"";
+                    return new CommandResult(false, $"Illegal permission \"{parts[3]}\"");
 
                 SetPermission(parts[2], permission);
-                return $"Permission for {parts[2]} set to {permission}";
+                return new CommandResult(true, $"Permission for {parts[2]} set to {permission}");
             }
 
             if (parts[1].Equals("query") && parts.Length == 3)
-                return $"Permission for {parts[2]} is {QueryPermission(parts[2])}";
+                return new CommandResult(true, $"Permission for {parts[2]} is {QueryPermission(parts[2])}");
 
-            return "Invalid command";
+            return new CommandResult(false, "Invalid command");
         }
     }
 }

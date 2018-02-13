@@ -15,14 +15,11 @@ namespace TwitchBot.Commands
         /// <returns>False</returns>
         public override bool IsRemoveable => false;
 
-        private readonly CommandHandler handler;
-
         /// <summary>
         /// Initializes MetaCommand
         /// </summary>
-        public MetaCommand(CommandHandler handler) : base("command", 1)
+        public MetaCommand(CommandHandler handler) : base(handler, "command", 1)
         {
-            this.handler = handler;
         }
 
         /// <summary>
@@ -31,32 +28,32 @@ namespace TwitchBot.Commands
         /// <param name="line">Line to process</param>
         /// <param name="sender">sender name</param>
         /// <returns></returns>
-        public override string Process(string line, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)
-                return "Invalid command.";
+                return new CommandResult(false, "Invalid command.");
 
             if (parts[1].Equals("list"))
-                return handler.ListCommands();
+                return new CommandResult(true, Handler.ListCommands());
 
             if (parts[1].Equals("add") && parts.Length > 3)
             {
-                if (handler.AddCommand(parts[2], string.Join(' ', parts, 3, parts.Length - 3)))
-                    return "Command was successfully added.";
+                if (Handler.AddCommand(parts[2], string.Join(' ', parts, 3, parts.Length - 3)))
+                    return new CommandResult(true, "Command was successfully added.");
 
-                return "Failed to add command.";
+                return new CommandResult(false, "Failed to add command.");
             }
 
             if (parts[1].Equals("remove") && parts.Length == 3)
             {
-                if (handler.RemoveCommand(parts[2]))
-                    return "Command was successfully removed.";
+                if (Handler.RemoveCommand(parts[2]))
+                    return new CommandResult(true, "Command was successfully removed.");
 
-                return "Could not remove command.";
+                return new CommandResult(false, "Could not remove command.");
             }
 
-            return "Invalid command.";
+            return new CommandResult(false, "Invalid command.");
         }
     }
 }
