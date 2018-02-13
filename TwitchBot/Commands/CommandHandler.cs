@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot.Commands
 {
@@ -12,6 +12,7 @@ namespace TwitchBot.Commands
     internal class CommandHandler
     {
         private readonly Dictionary<string, Command> commands;
+        private readonly PermissionManager permissionManager;
         private readonly IRC irc;
         private readonly string channelOwner;
 
@@ -24,9 +25,12 @@ namespace TwitchBot.Commands
         {
             this.irc = irc;
             this.channelOwner = channelOwner;
+
             commands = new Dictionary<string, Command>();
+            permissionManager = new PermissionManager();
 
             var services = new ServiceCollection()
+                .AddSingleton(irc)
                 .AddSingleton(irc)
                 .AddSingleton<MetaCommand>()
                 .AddSingleton<UptimeCommand>()
@@ -97,11 +101,11 @@ namespace TwitchBot.Commands
                 }
 
                 //Check if the sender has permission to use the requested command
-                //if (!commands[name].HasPermission(permission.QueryPermission(sender)))
-                //{
-                //    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
-                //    return false;
-                //}
+                if (!commands[name].HasPermission(permissionManager.QueryPermission(channel, sender)))
+                {
+                    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
+                    return false;
+                }
                 //Execute the command and send the response
                 irc.SendMessage(commands[name].Process(line, sender).Response, channel);
             }
