@@ -14,17 +14,16 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <returns>False</returns>
         public override bool IsRemoveable => false;
-
-        public const int MaxPermission = 10;
-        private readonly Dictionary<string, int> permissions;
+        private PermissionStorage permission;
 
         /// <summary>
         /// Initializes PermissionsCommand
         /// <param name="handler">Ununsed by the PermissionCommand</param>
+        /// <param name="permission">PermissionStorage for handling the permissions</param>
         /// </summary>
-        public PermissionCommand(CommandHandler handler) : base(handler, "permission")
+        public PermissionCommand(CommandHandler handler, PermissionStorage permission) : base(handler, "permission")
         {
-            permissions = new Dictionary<string, int>();
+            this.permission = permission;
         }
 
         /// <summary>
@@ -34,26 +33,18 @@ namespace TwitchBot.Commands
         /// <returns>Permission level of 0 to 10</returns>
         public int QueryPermission(string name)
         {
-            lock(permissions)
-            {
-                if (permissions.ContainsKey(name))
-                    return permissions[name];
-
-                return 0;
-            }
+            return permission.GetPermission(name);
         }
 
         /// <summary>
         /// Sets the given permission level for a user
         /// </summary>
         /// <param name="name">Name of the user to set permission level for</param>
-        /// <param name="permission">Permission level to set</param>
-        public void SetPermission(string name, int permission)
+        /// <param name="permissionLevel">Permission level to set</param>
+        /// <param name="commandIssuer">User who issued the command</param>
+        public bool SetPermission(string name, int permissionLevel, string commandIssuer)
         {
-            lock (permissions)
-            {
-                permissions[name] = permission;
-            }
+            return permission.SetPermission(name, permissionLevel, commandIssuer);
         }
 
         /// <summary>
@@ -71,10 +62,9 @@ namespace TwitchBot.Commands
 
             if (parts[1].Equals("set") && parts.Length == 4)
             {
-                if (!int.TryParse(parts[3], out int permission) || permission < 0 || permission > MaxPermission)
+                if (!int.TryParse(parts[3], out int permission) || !SetPermission(parts[2], permission, parts[3]))
                     return new CommandResult(false, $"Illegal permission \"{parts[3]}\"");
 
-                SetPermission(parts[2], permission);
                 return new CommandResult(true, $"Permission for {parts[2]} set to {permission}");
             }
 
