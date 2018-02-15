@@ -103,8 +103,16 @@ namespace TwitchBot.Commands
                     irc.SendMessage($"{sender} You lack the permission to use this command", channel);
                     return false;
                 }
-                //Execute the command and send the response
-                irc.SendMessage(commands[name].Process(line, sender), channel);
+                CommandResult result = commands[name].Process(line, sender);
+                if (result.Succeeded)
+                {
+                    // TODO
+                }
+                else
+                {
+                    // TODO
+                }
+                irc.SendMessage(result.Response, channel);
             }
 
             return true;
@@ -144,7 +152,7 @@ namespace TwitchBot.Commands
                 if (commands.ContainsKey(key))
                     return false;
 
-                BasicCommand cmd = new BasicCommand(key, response);
+                BasicCommand cmd = new BasicCommand(key, response, this);
                 commands[cmd.Name] = cmd;
             }
 
