@@ -8,7 +8,7 @@ using System.Threading;
 namespace TwitchBot
 {
     /// <summary>
-    /// Minimalistic IRC implementation
+    /// Minimalistic thread-safe IRC implementation
     /// </summary>
     internal class IRC : IDisposable
     {
@@ -16,15 +16,14 @@ namespace TwitchBot
         private StreamReader reader;
         private StreamWriter writer;
         private Thread listenerThread;
-        public delegate void MessageReceived(ChatMessage message);
-        public event MessageReceived MessageReceivedEvent;
+        private Dictionary<string, List<Action<ChatMessage>>> callbacks;
 
         /// <summary>
         /// Initialises a new IRC instance
         /// </summary>
         public IRC()
         {
-
+            this.callbacks = new Dictionary<string, List<Action<ChatMessage>>>();
         }
 
         /// <summary>
@@ -38,6 +37,41 @@ namespace TwitchBot
             client?.Dispose();
             reader?.Dispose();
             writer?.Dispose();
+        }
+
+        /// <summary>
+        /// Registers a callback for the messages of the given channel
+        /// </summary>
+        /// <param name="callback">Callback to invoke for messages</param>
+        /// <param name="channel">Channel to register the callback for</param>
+        /// <returns></returns>
+        public bool RegisterMessageCallback(Action<ChatMessage> callback, string channel)
+        {
+            lock(callbacks)
+            {
+                if(!callbacks.ContainsKey(channel))
+                {
+                    callbacks[channel] = new List<Action<ChatMessage>>();
+                }
+                callbacks[channel].Add(callback);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Unregisters the given callback from the channel
+        /// </summary>
+        /// <param name="callback">Callback to unregister</param>
+        /// <param name="channel">Channel the callback was attached to</param>
+        /// <returns></returns>
+        public bool UnregisterMessageCallback(Action<ChatMessage> callback, string channel)
+        {
+            lock(callbacks)
+            {
+                if (callbacks.ContainsKey(channel))
+                    callbacks[channel].Remove(callback);
+            }
+            return true;
         }
 
         /// <summary>
@@ -78,9 +112,15 @@ namespace TwitchBot
         /// </summary>
         public void Disconnect()
         {
-            writer.Write("QUIT");
-            writer.Flush();
-            client.Close();
+            lock (writer)
+            {
+                writer.Write("QUIT");
+                writer.Flush();
+            }
+            lock(client)
+            {
+                client.Close();
+            }
             listenerThread.Join();
         }
 
@@ -90,8 +130,11 @@ namespace TwitchBot
         /// <param name="message">IRC message to send</param>
         public void SendMessage(string message)
         {
-            writer.Write($"{message}\r\n");
-            writer.Flush();
+            lock (writer)
+            {
+                writer.Write($"{message}\r\n");
+                writer.Flush();
+            }
         }
 
         /// <summary>
@@ -101,8 +144,11 @@ namespace TwitchBot
         /// <param name="channel">Channel to send the message to</param>
         public void SendMessage(string message, string channel)
         {
-            writer.Write($"PRIVMSG {channel} :{message}\r\n");
-            writer.Flush();
+            lock (writer)
+            {
+                writer.Write($"PRIVMSG {channel} :{message}\r\n");
+                writer.Flush();
+            }
         }
 
         /// <summary>
@@ -112,15 +158,36 @@ namespace TwitchBot
         {
             while (true)
             {
-                string line = reader.ReadLine();
+                string line;
+                lock (reader)
+                {
+                    line = reader.ReadLine();
+                }
                 Console.WriteLine(line);
-                ChatMessage message = ParseMessage(line);
+                IRCMessage message = ParseMessage(line);
 
                 // Respond to pings
                 if (message.Command.Equals("PING"))
                     SendMessage($"PONG {line.Substring(line.IndexOf("PING", StringComparison.Ordinal) + 5)}");
-                else
-                    MessageReceivedEvent?.Invoke(message);
+                else if(message.Command.Equals("PRIVMSG"))
+                {
+                    ChatMessage chatMessage;
+                    try
+                    {
+                        chatMessage = new ChatMessage(message);
+                    } catch(ArgumentException)
+                    {
+                        continue;
+                    }
+                    lock (callbacks) {
+                        if (callbacks.ContainsKey(chatMessage.Channel)) {
+                            foreach (Action<ChatMessage> callback in callbacks[chatMessage.Channel])
+                            {
+                                callback.Invoke(chatMessage);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -130,16 +197,19 @@ namespace TwitchBot
         /// <param name="channel">Name of the channel to join</param>
         public void JoinChannel(string channel)
         {
-            writer.Write($"JOIN {channel}\r\n");
-            writer.Flush();
+            lock (writer)
+            {
+                writer.Write($"JOIN {channel}\r\n");
+                writer.Flush();
+            }
         }
 
         /// <summary>
         /// Parses a single IRC message to its corresponding parts
         /// </summary>
         /// <param name="rawMessage">Raw representation of a single IRC message</param>
-        /// <returns>ChatMessage object containing the strucuted IRC message</returns>
-        private ChatMessage ParseMessage(string rawMessage)
+        /// <returns>IRCMessage object containing the strucuted IRC message</returns>
+        private IRCMessage ParseMessage(string rawMessage)
         {
             string prefix = "", trailing = "", command = "";
             string[] parameters = null;
@@ -185,7 +255,7 @@ namespace TwitchBot
             else
                 command = cmdAndParameters;
 
-            return new ChatMessage(prefix, command, trailing, parameters);
+            return new IRCMessage(prefix, command, trailing, parameters);
         }
     }
 }

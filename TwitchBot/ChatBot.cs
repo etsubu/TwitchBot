@@ -14,7 +14,6 @@ namespace TwitchBot
         private ChatBot()
         {
             irc = new IRC();
-            irc.MessageReceivedEvent += MessageReceived;
         }
 
         public ChatBot(Configuration configuration) : this()
@@ -38,14 +37,7 @@ namespace TwitchBot
         /// <param name="message">ChatMessage that contains the parsed message</param>
         public void MessageReceived(ChatMessage message)
         {
-            Console.WriteLine(message.Command);
-            
-            if (message.Command.Equals("PRIVMSG") && message.Username != null)
-            {
-                //Console.WriteLine(message.);
-                string line = message.Trailing;
-                commands.ProcessCommand(line, message.Username.ToLower(), message.Parameters[0]);
-            }
+
         }
 
         /// <summary>
