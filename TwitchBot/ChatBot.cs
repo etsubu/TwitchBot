@@ -3,21 +3,25 @@ using TwitchBot.Commands;
 
 namespace TwitchBot
 {
-    internal class ChatBot : IDisposable
+    internal class ChatBot
     {
         private readonly IRC irc;
-        private CommandHandler commands;
+        private readonly Configuration configuration;
+        private readonly CommandHandler commandHandler;
 
         /// <summary>
         /// Initializes ChatBot
         /// </summary>
-        private ChatBot()
+        public ChatBot(IRC irc, Configuration configuration, CommandHandler commandHandler)
         {
-            irc = new IRC();
-            irc.MessageReceivedEvent += MessageReceived;
+            this.irc = irc;
+            this.configuration = configuration;
+            this.commandHandler = commandHandler;
+
+            this.irc.MessageReceivedEvent += MessageReceived;
         }
 
-        public ChatBot(Configuration configuration) : this()
+        public void Start()
         {
             irc.ConnectServer(
                 configuration.Connection.Host,
@@ -27,7 +31,7 @@ namespace TwitchBot
 
             foreach (var channel in configuration.Channels)
             {
-                irc.JoinChannel(channel);
+                // TODO: register channel-specific callback for IRC
                 irc.SendMessage("Hello world", channel);
             }
         }
@@ -44,7 +48,7 @@ namespace TwitchBot
             {
                 //Console.WriteLine(message.);
                 string line = message.Trailing;
-                commands.ProcessCommand(line, message.Username.ToLower(), message.Parameters[0]);
+                commandHandler.ProcessCommand(line, message.Username.ToLower(), message.Parameters[0]);
             }
         }
 
@@ -52,10 +56,5 @@ namespace TwitchBot
         /// Synchronously waits for the IRC client to exit
         /// </summary>
         public void WaitForExit() => irc.WaitForExit();
-
-        public void Dispose()
-        {
-            irc?.Dispose();
-        }
     }
 }
