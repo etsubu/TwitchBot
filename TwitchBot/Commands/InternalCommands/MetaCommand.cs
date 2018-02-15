@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TwitchBot.Commands
+namespace TwitchBot.Commands.InternalCommands
 {
     /// <summary>
     /// MetaCommand handles modifying, adding, removing and listing of the existing commands

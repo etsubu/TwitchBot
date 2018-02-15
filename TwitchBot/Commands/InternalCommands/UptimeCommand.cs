@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using TwitchBot.Extensions;
 
-namespace TwitchBot.Commands
+namespace TwitchBot.Commands.InternalCommands
 {
     /// <summary>
     /// UptimeCommand is used to retrieve the amount of time the program has been running in hours, minutes and seconds

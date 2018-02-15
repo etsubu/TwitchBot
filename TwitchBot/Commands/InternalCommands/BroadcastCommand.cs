@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Timers;
 
-namespace TwitchBot.Commands
+namespace TwitchBot.Commands.InternalCommands
 {
     // TODO: make this command handle broadcasts for all channels
     /// <summary>

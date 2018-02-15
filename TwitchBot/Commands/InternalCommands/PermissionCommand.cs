@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using TwitchBot.Commands.Permissions;
 
-namespace TwitchBot.Commands
+namespace TwitchBot.Commands.InternalCommands
 {
     /// <summary>
     /// Manages the permission levels for all users
