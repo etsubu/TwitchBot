@@ -61,6 +61,7 @@ namespace TwitchBot
             SendMessage("USER " + user + " 0 * :...");
             SendMessage("NICK " + user);
 
+
             listenerThread = new Thread(MessageReader);
             listenerThread.Start();
 
