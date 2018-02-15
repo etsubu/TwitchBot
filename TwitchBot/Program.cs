@@ -26,6 +26,8 @@ namespace TwitchBot
 
             var provider = services.BuildServiceProvider();
 
+            // TODO: add channel owner
+            provider.GetRequiredService<CommandHandler>().Start("");
             var chatBot = provider.GetRequiredService<ChatBot>();
             chatBot.Start();
             chatBot.WaitForExit();

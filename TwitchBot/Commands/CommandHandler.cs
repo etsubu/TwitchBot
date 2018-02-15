@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
 using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot.Commands
@@ -14,45 +13,28 @@ namespace TwitchBot.Commands
         private readonly Dictionary<string, Command> commands;
         private readonly PermissionManager permissionManager;
         private readonly IRC irc;
-        private readonly string channelOwner;
+        private readonly IServiceProvider serviceProvider;
+        private string channelOwner;
 
         /// <summary>
         /// Initializes CommandHandler
         /// </summary>
         /// <param name="irc">IRC object to use for sending messages</param>
         /// <param name="channelOwner">Name of the channel owner</param>
-        public CommandHandler(IRC irc, string channelOwner)
+        public CommandHandler(IRC irc, PermissionManager permissionManager, IServiceProvider serviceProvider)
         {
             this.irc = irc;
-            this.channelOwner = channelOwner;
+            this.permissionManager = permissionManager;
+            this.serviceProvider = serviceProvider;
 
             commands = new Dictionary<string, Command>();
-            permissionManager = new PermissionManager();
+        }
 
-            var services = new ServiceCollection()
-                .AddSingleton(irc)
-                .AddSingleton(irc)
-                .AddSingleton<MetaCommand>()
-                .AddSingleton<UptimeCommand>()
-                .AddSingleton<PermissionCommand>()
-                .AddSingleton(srv => new BroadcastCommand(
-                    srv.GetRequiredService<IRC>(),
-                    "#" + channelOwner,
-                    this));
+        public void Start(string channelOwner)
+        {
+            this.channelOwner = channelOwner;
 
-            var provider = services.BuildServiceProvider();
-
-            // instantiate/initialise commands by fetching them from the DI provider
-            // BroadcastCommand is instantiated when its added as a singleton
-            provider.GetRequiredService<MetaCommand>();
-            provider.GetRequiredService<UptimeCommand>();
             
-            // TODO: global permissions for PermissionManager
-            //var permission = provider.GetRequiredService<PermissionCommand>();
-            //permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
-
-            foreach (var command in provider.GetServices<Command>())
-                commands.Add(command.Name, command);
         }
 
         /// <summary>

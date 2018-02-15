@@ -5,6 +5,7 @@ using System.Timers;
 
 namespace TwitchBot.Commands
 {
+    // TODO: make this command handle broadcasts for all channels
     /// <summary>
     /// Handles sending all the broadcast messages and adding, removing, modifying them
     /// </summary>
