@@ -72,6 +72,6 @@ namespace TwitchBot.Commands
         /// <param name="permission">Permission level of the sender</param>
         /// <param name="sender">Sender name</param>
         /// <returns>CommandResult object containing the information about the result of the executed command</returns>
-        public abstract CommandResult Process(string line, string sender);
+        public abstract CommandResult Process(string line, string channel, string sender);
     }
 }

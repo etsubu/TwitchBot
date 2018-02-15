@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot.Commands
 {
@@ -12,7 +12,7 @@ namespace TwitchBot.Commands
     internal class CommandHandler
     {
         private readonly Dictionary<string, Command> commands;
-        private readonly PermissionStorage permissions;
+        private readonly PermissionManager permissionManager;
         private readonly IRC irc;
         private readonly string channelOwner;
 
@@ -25,16 +25,16 @@ namespace TwitchBot.Commands
         {
             this.irc = irc;
             this.channelOwner = channelOwner;
-            this.permissions = new PermissionStorage();
+
             commands = new Dictionary<string, Command>();
+            permissionManager = new PermissionManager();
 
             var services = new ServiceCollection()
                 .AddSingleton(irc)
+                .AddSingleton(irc)
                 .AddSingleton<MetaCommand>()
                 .AddSingleton<UptimeCommand>()
-                .AddSingleton(prm => new PermissionCommand(
-                    this,
-                    permissions))
+                .AddSingleton<PermissionCommand>()
                 .AddSingleton(srv => new BroadcastCommand(
                     srv.GetRequiredService<IRC>(),
                     "#" + channelOwner,
@@ -46,10 +46,10 @@ namespace TwitchBot.Commands
             // BroadcastCommand is instantiated when its added as a singleton
             provider.GetRequiredService<MetaCommand>();
             provider.GetRequiredService<UptimeCommand>();
-
+            
+            // TODO: global permissions for PermissionManager
             //var permission = provider.GetRequiredService<PermissionCommand>();
-            //permission.SetPermission(channelOwner, PermissionStorage.MaxPermission);
-            permissions.SetHardPermission(channelOwner, PermissionStorage.MaxPermission);
+            //permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
 
             foreach (var command in provider.GetServices<Command>())
                 commands.Add(command.Name, command);
@@ -102,13 +102,13 @@ namespace TwitchBot.Commands
                 }
 
                 //Check if the sender has permission to use the requested command
-                //if (!commands[name].HasPermission(permission.QueryPermission(sender)))
-                //{
-                //    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
-                //    return false;
-                //}
+                if (!commands[name].HasPermission(permissionManager.QueryPermission(channel, sender)))
+                {
+                    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
+                    return false;
+                }
                 //Execute the command and send the response
-                irc.SendMessage(commands[name].Process(line, sender).Response, channel);
+                irc.SendMessage(commands[name].Process(line, channel, sender).Response, channel);
             }
 
             return true;
