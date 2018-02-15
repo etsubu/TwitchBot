@@ -12,6 +12,7 @@ namespace TwitchBot.Commands
     internal class CommandHandler
     {
         private readonly Dictionary<string, Command> commands;
+        private readonly PermissionStorage permissions;
         private readonly IRC irc;
         private readonly string channelOwner;
 
@@ -24,13 +25,16 @@ namespace TwitchBot.Commands
         {
             this.irc = irc;
             this.channelOwner = channelOwner;
+            this.permissions = new PermissionStorage();
             commands = new Dictionary<string, Command>();
 
             var services = new ServiceCollection()
                 .AddSingleton(irc)
                 .AddSingleton<MetaCommand>()
                 .AddSingleton<UptimeCommand>()
-                .AddSingleton<PermissionCommand>()
+                .AddSingleton(prm => new PermissionCommand(
+                    this,
+                    permissions))
                 .AddSingleton(srv => new BroadcastCommand(
                     srv.GetRequiredService<IRC>(),
                     "#" + channelOwner,
@@ -42,9 +46,10 @@ namespace TwitchBot.Commands
             // BroadcastCommand is instantiated when its added as a singleton
             provider.GetRequiredService<MetaCommand>();
             provider.GetRequiredService<UptimeCommand>();
-            
-            var permission = provider.GetRequiredService<PermissionCommand>();
-            permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
+
+            //var permission = provider.GetRequiredService<PermissionCommand>();
+            //permission.SetPermission(channelOwner, PermissionStorage.MaxPermission);
+            permissions.SetHardPermission(channelOwner, PermissionStorage.MaxPermission);
 
             foreach (var command in provider.GetServices<Command>())
                 commands.Add(command.Name, command);
