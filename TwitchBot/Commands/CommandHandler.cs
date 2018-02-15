@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot.Commands
@@ -34,6 +37,59 @@ namespace TwitchBot.Commands
         {
             this.channelOwner = channelOwner;
 
+            CreateInternalCommands();
+        }
+
+        private void CreateInternalCommands()
+        {
+            // SO I HEARD YOU LIKE REFLECTION?
+            // OH YOU'RE IN FOR A RIDE
+            foreach (var commandType in
+                from type in Assembly.GetExecutingAssembly().GetTypes()
+                where type.IsClass &&
+                      type.Namespace == "TwitchBot.Commands.InternalCommands" &&
+                      type.IsSubclassOf(typeof(Command)) // subclass = strict inheritance
+                select type)
+            {
+                // don't know if I can somehow ask the service provider to construct me an arbitrary class
+                // oh well, let's do it manually
+                var constructors = commandType.GetConstructors();
+
+                if (constructors.Length > 1)
+                {
+                    // TODO: display warning
+                    continue;
+                }
+
+                var constructor = constructors[0];
+                if (!TryGetMatchingArguments(constructor.GetParameters(), out var arguments))
+                {
+                    // TODO: display warning
+                    continue;
+                }
+
+                var instance = (Command)constructor.Invoke(arguments);
+                commands.Add(instance.Name, instance);
+            }
+        }
+
+        private bool TryGetMatchingArguments(ParameterInfo[] parameters, out object[] arguments)
+        {
+            var valuesList = new List<object>(parameters.Length);
+            arguments = null;
+
+            foreach (var param in parameters)
+            {
+                var paramValue = serviceProvider.GetService(param.ParameterType);
+
+                if (paramValue == null && !param.IsOptional)
+                    return false;
+
+                valuesList.Add(paramValue);
+            }
+
+            arguments = valuesList.ToArray();
+            return true;
         }
 
         /// <summary>
