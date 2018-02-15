@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TwitchBot.Commands
 {
@@ -24,32 +26,29 @@ namespace TwitchBot.Commands
             this.channelOwner = channelOwner;
             commands = new Dictionary<string, Command>();
 
-            //Channel owner always has max permission by default
-            permission.SetPermission(this.channelOwner, PermissionCommand.MaxPermission);
+            var services = new ServiceCollection()
+                .AddSingleton(irc)
+                .AddSingleton<MetaCommand>()
+                .AddSingleton<UptimeCommand>()
+                .AddSingleton<PermissionCommand>()
+                .AddSingleton(srv => new BroadcastCommand(
+                    srv.GetRequiredService<IRC>(),
+                    "#" + channelOwner,
+                    this));
+
+            var provider = services.BuildServiceProvider();
+
+            // instantiate/initialise commands by fetching them from the DI provider
+            // BroadcastCommand is instantiated when its added as a singleton
+            provider.GetRequiredService<MetaCommand>();
+            provider.GetRequiredService<UptimeCommand>();
+            
+            var permission = provider.GetRequiredService<PermissionCommand>();
+            permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
+
+            foreach (var command in provider.GetServices<Command>())
+                commands.Add(command.Name, command);
         }
-
-        private void RegisterCommand<TCommand>(Action<TCommand> commandConfiguration = null) where TCommand : Command
-        {
-            var instance = Activator.CreateInstance(typeof(TCommand), this);
-        }
-
-        /// <summary>
-        /// Initializes the existing commands
-        /// </summary>
-        //private void InitCommands()
-        //{
-        //    meta = new MetaCommand(this);
-        //    uptime = new UptimeCommand();
-        //    permission = new PermissionCommand();
-        //    broadcast = new BroadcastCommand(irc, "#" + channelOwner);
-        //    commands.Add(meta.Name, meta);
-        //    commands.Add(uptime.Name, uptime);
-        //    commands.Add(permission.Name, permission);
-        //    commands.Add(broadcast.Name, broadcast);
-
-        //    //Channel owner always has max permission by default
-        //    permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
-        //}
 
         /// <summary>
         /// Lists all the names of available commands
@@ -98,21 +97,13 @@ namespace TwitchBot.Commands
                 }
 
                 //Check if the sender has permission to use the requested command
-                if (!commands[name].HasPermission(permission.QueryPermission(sender)))
-                {
-                    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
-                    return false;
-                }
-                CommandResult result = commands[name].Process(line, sender);
-                if (result.Succeeded)
-                {
-                    // TODO
-                }
-                else
-                {
-                    // TODO
-                }
-                irc.SendMessage(result.Response, channel);
+                //if (!commands[name].HasPermission(permission.QueryPermission(sender)))
+                //{
+                //    irc.SendMessage($"{sender} You lack the permission to use this command", channel);
+                //    return false;
+                //}
+                //Execute the command and send the response
+                irc.SendMessage(commands[name].Process(line, sender).Response, channel);
             }
 
             return true;

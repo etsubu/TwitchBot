@@ -11,12 +11,12 @@ namespace TwitchBot.Commands
     internal class BroadcastCommand : Command
     {
         public override bool IsRemoveable => false;
+        public string Channel { get; }
 
         private readonly IRC irc;
         private readonly List<BroadcastMessage> messages;
         private readonly Timer timer;
         private int tickCount;
-        private readonly string channel;
 
         /// <summary>
         /// Initializes the BroadcastCommand
@@ -27,7 +27,7 @@ namespace TwitchBot.Commands
         public BroadcastCommand(IRC irc, string channel, CommandHandler handler):base(handler, "broadcast", 1)
         {
             this.irc = irc;
-            this.channel = channel;
+            this.Channel = channel;
             tickCount = 0;
             timer = new Timer(1000);
             messages = new List<BroadcastMessage>();
@@ -49,7 +49,7 @@ namespace TwitchBot.Commands
                 {
                     if (message.IsTiming(tickCount))
                     {
-                        irc.SendMessage(message.GetMessage(), channel);
+                        irc.SendMessage(message.GetMessage(), Channel);
                     }
                 }
             }
