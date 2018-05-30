@@ -6,7 +6,8 @@ namespace TwitchBot
     internal class ChatBot : IDisposable
     {
         private readonly IRC irc;
-        private CommandHandler commands;
+        private readonly CommandHandler commands;
+        private readonly Channel[] channels;
 
         /// <summary>
         /// Initializes ChatBot
@@ -23,11 +24,12 @@ namespace TwitchBot
                 configuration.Connection.Port,
                 configuration.Username,
                 configuration.OAuthToken);
+            channels = new Channel[configuration.Channels.Length];
 
-            foreach (var channel in configuration.Channels)
+            for(int i = 0; i < configuration.Channels.Length; i++)
             {
-                irc.JoinChannel(channel);
-                irc.SendMessage("Hello world", channel);
+                irc.JoinChannel(configuration.Channels[i]);
+                channels[i] = new Channel(irc, configuration.Channels[i]);
             }
         }
 

@@ -51,6 +51,7 @@ namespace TwitchBot
             {
                 if(!callbacks.ContainsKey(channel))
                 {
+                    Console.WriteLine("registered " + channel);
                     callbacks[channel] = new List<Action<ChatMessage>>();
                 }
                 callbacks[channel].Add(callback);

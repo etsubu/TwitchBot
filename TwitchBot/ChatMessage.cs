@@ -17,14 +17,20 @@ namespace TwitchBot
         /// <param name="message"></param>
         public ChatMessage(IRCMessage message)
         {
-            if (!message.Equals("PRIVMSG"))
+            if (!message.Command.Equals("PRIVMSG"))
+            {
                 throw new ArgumentException();
+            }
             int nameEndIndex = message.Prefix.IndexOf("!", StringComparison.Ordinal);
             if (nameEndIndex == -1 || nameEndIndex == 0)
+            {
                 throw new ArgumentException();
+            }
             Sender = message.Prefix.Substring(0, nameEndIndex);
             if (message.Parameters == null)
+            {
                 throw new ArgumentException();
+            }
             Channel = message.Parameters[0];
             Message = message.Trailing;
         }

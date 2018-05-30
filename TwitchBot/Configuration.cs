@@ -40,7 +40,7 @@ namespace TwitchBot
         public Connection Connection { get; }
         public string[] Channels { get; }
 
-        private Configuration(string username, string oauthToken, Connection connection, string[] channels)
+        public Configuration(string username, string oauthToken, Connection connection, string[] channels)
         {
             Username = username;
             OAuthToken = oauthToken;

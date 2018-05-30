@@ -31,7 +31,6 @@ namespace TwitchBot.Commands
 
             var services = new ServiceCollection()
                 .AddSingleton(irc)
-                .AddSingleton(irc)
                 .AddSingleton<MetaCommand>()
                 .AddSingleton<UptimeCommand>()
                 .AddSingleton<PermissionCommand>()
@@ -44,9 +43,9 @@ namespace TwitchBot.Commands
 
             // instantiate/initialise commands by fetching them from the DI provider
             // BroadcastCommand is instantiated when its added as a singleton
-            provider.GetRequiredService<MetaCommand>();
             provider.GetRequiredService<UptimeCommand>();
-            
+            provider.GetRequiredService<MetaCommand>();
+
             // TODO: global permissions for PermissionManager
             //var permission = provider.GetRequiredService<PermissionCommand>();
             //permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
