@@ -16,6 +16,11 @@ namespace TwitchBot.Commands
         /// <returns>False</returns>
         public override bool IsRemoveable => false;
 
+        /// <summary>
+        /// UptimeCommand is not global command
+        /// </summary>
+        public override bool IsGlobal => false;
+
         private DateTimeOffset startTime;
 
         /// <summary>
@@ -32,7 +37,7 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="line">Command line</param>
         /// <returns>Running time in hours, minutes and seconds or a message indicating that the timer has been reset</returns>
-        public override CommandResult Process(string line, string channel, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             if(line.Equals("uptime"))
             {

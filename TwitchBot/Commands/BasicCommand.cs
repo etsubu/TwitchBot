@@ -15,6 +15,11 @@ namespace TwitchBot.Commands
         /// <returns>True</returns>
         public override bool IsRemoveable => true;
 
+        /// <summary>
+        /// BasicCommand is not global command
+        /// </summary>
+        public override bool IsGlobal => false;
+
         private readonly string response;
 
         /// <summary>
@@ -33,7 +38,7 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line to process</param>
         /// <param name="sender">sender name</param>
         /// <returns>Static response to the command</returns>
-        public override CommandResult Process(string line, string channel, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             return new CommandResult(true, this.response);
         }

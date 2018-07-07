@@ -6,11 +6,11 @@ using TwitchBot.Commands.Permissions;
 namespace TwitchBot.Commands
 {
     /// <summary>
-    /// Manages the permission levels for all users
+    /// Manages the permission levels for all users in a single channel
+    /// PermissionCommand checks the legality of permissions updates
     /// </summary>
     internal class PermissionCommand : Command
     {
-        public const int MaxPermission = 10;
 
         /// <summary>
         /// PermissionCommand is not removeable
@@ -18,16 +18,23 @@ namespace TwitchBot.Commands
         /// <returns>False</returns>
         public override bool IsRemoveable => false;
 
+        /// <summary>
+        /// PermissionCommand is not global command
+        /// </summary>
+        public override bool IsGlobal => false;
+
         private readonly PermissionManager permissionManager;
+        private readonly string channel;
 
         /// <summary>
         /// Initializes PermissionsCommand
         /// <param name="handler">Ununsed by the PermissionCommand</param>
-        /// <param name="permission">PermissionStorage for handling the permissions</param>
+        /// <param name="permission">PermissionManager for requesting actual permissions from</param>
         /// </summary>
         public PermissionCommand(PermissionManager permissionManager, CommandHandler handler) : base(handler, "permission")
         {
             this.permissionManager = permissionManager;
+            this.channel = "#" + handler.channelOwner;
         }
 
         /// <summary>
@@ -36,35 +43,55 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line</param>
         /// <param name="sender">sender name</param>
         /// <returns>Message telling the result of the command</returns>
-        public override CommandResult Process(string line, string channel, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
 
             if (parts.Length < 2)
                 return new CommandResult(false, "Invalid command");
 
-            var command = parts[1];
-            var name = parts[2];
-            var permissionString = parts[3];
+            string command = parts[1];
+            string name = parts[2];
 
             if (command.Equals("set") && parts.Length == 4)
             {
-                if (!int.TryParse(permissionString, out int permission) || permission < 0 || permission > MaxPermission)
-                    return new CommandResult(false, $"Illegal permission \"{permissionString}\"");
+                string permissionString = parts[3];
+                // Check that the permission level is an integer between 0 - MaxPermission
+                if (!int.TryParse(permissionString, out int permission) || permission < 0 || permission > PermissionManager.MaxPermission)
+                    return new CommandResult(false, $"Illegal permission \"{permissionString}\" should be between 0-" + PermissionManager.MaxPermission);
 
-                permissionManager.UpdatePermission(channel, name, permission);
-                return new CommandResult(true, $"Permission for {name} set to {permission}");
+                // Check that the user requesting the permission update has required permission
+                // person can only change others permission IF he has higher permission, and the
+                // updated permission must be lower than his own
+                // => you cannot change someones permission if he has the same level as you
+                // and you cannot make someone the same permission level as you
+                int senderPermission = permissionManager.QueryPermission(channel, sender);
+                int personToBeUpdatedPermission = permissionManager.QueryPermission(channel, name);
+                if (senderPermission > personToBeUpdatedPermission)
+                {
+                    if (permission < senderPermission)
+                    {
+                        permissionManager.UpdatePermission(Handler.channelOwner, name, permission);
+                        return new CommandResult(true, $"Permission for {name} set to {permission}");
+                    }
+                    return new CommandResult(false, $"{sender} The permission you set for others must be lower than yours");
+                } else
+                {
+                    return new CommandResult(false, $"{sender} You lack the permission to change the permission level of {name}");
+                }
             }
 
             if (command.Equals("query") && parts.Length == 3)
-                return new CommandResult(true, $"Permission for {name} is {permissionManager.QueryPermission(channel, name)}");
+            {
+                return new CommandResult(true, $"Permission for {name} is {permissionManager.QueryPermission(Handler.channelOwner, name)}");
+            }
 
             return new CommandResult(false, "Invalid command");
         }
 
         public override string Help()
         {
-            return "";
+            return "Usage: !permission query [USERNAME] --- !permission set [NAME] [PERMISSION_LEVEL(0-" + PermissionManager.MaxPermission + ")]";
         }
     }
 }

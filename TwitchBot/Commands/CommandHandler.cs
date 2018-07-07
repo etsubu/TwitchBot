@@ -14,7 +14,7 @@ namespace TwitchBot.Commands
         private readonly Dictionary<string, Command> commands;
         private readonly PermissionManager permissionManager;
         private readonly IRC irc;
-        private readonly string channelOwner;
+        public readonly string channelOwner;
 
         /// <summary>
         /// Initializes CommandHandler
@@ -110,13 +110,18 @@ namespace TwitchBot.Commands
                 }
 
                 //Check if the sender has permission to use the requested command
-                if (!commands[name].HasPermission(permissionManager.QueryPermission(channel, sender)))
+                bool hasPermission = false;
+                hasPermission = (commands[name].IsGlobal) ? 
+                    commands[name].HasPermission(permissionManager.QueryGlobalPermission(sender))
+                    : commands[name].HasPermission(permissionManager.QueryPermission(channel, sender));
+
+                if (!hasPermission)
                 {
                     irc.SendMessage($"{sender} You lack the permission to use this command", channel);
                     return false;
                 }
                 //Execute the command and send the response
-                irc.SendMessage(commands[name].Process(line, channel, sender).Response, channel);
+                irc.SendMessage(commands[name].Process(line, sender).Response, channel);
             }
 
             return true;

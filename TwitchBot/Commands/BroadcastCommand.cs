@@ -11,6 +11,12 @@ namespace TwitchBot.Commands
     internal class BroadcastCommand : Command
     {
         public override bool IsRemoveable => false;
+
+        /// <summary>
+        /// BroadcastCommand is not global command
+        /// </summary>
+        public override bool IsGlobal => false;
+
         public string Channel { get; }
 
         private readonly IRC irc;
@@ -146,7 +152,7 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line</param>
         /// <param name="sender">Name of the sender</param>
         /// <returns>Response to the command</returns>
-        public override CommandResult Process(string line, string channel, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)

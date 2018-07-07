@@ -10,10 +10,15 @@ namespace TwitchBot.Commands
     internal abstract class Command
     {
         /// <summary>
-        /// Used to check if the command can be removed by the user
+        /// Used for checking if the command can be removed by the user
         /// </summary>
         /// <returns>True if the command can be removed, false if not</returns>
         public abstract bool IsRemoveable { get; }
+
+        /// <summary>
+        /// Used for checking if the command is global
+        /// </summary>
+        public abstract bool IsGlobal { get; }
 
         /// <summary>
         /// The name of this command
@@ -22,7 +27,7 @@ namespace TwitchBot.Commands
         public string Name => name;
 
         private readonly string name;
-        private readonly int requiredPermission;
+        private readonly int RequiredPermission;
         protected readonly CommandHandler Handler;
 
         /// <summary>
@@ -42,7 +47,7 @@ namespace TwitchBot.Commands
         {
             Handler = handler;
             this.name = name;
-            this.requiredPermission = requiredPermission;
+            this.RequiredPermission = requiredPermission;
         }
 
         /// <summary>
@@ -63,16 +68,15 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="permission">Permission level to check against</param>
         /// <returns>True if the given permission is enough, false if not</returns>
-        public bool HasPermission(int permission) => permission >= requiredPermission;
+        public bool HasPermission(int permission) => permission >= RequiredPermission;
 
         /// <summary>
         /// Processes the command
         /// </summary>
         /// <param name="line">Command line to process</param>
-        /// <param name="permission">Permission level of the sender</param>
         /// <param name="sender">Sender name</param>
         /// <returns>CommandResult object containing the information about the result of the executed command</returns>
-        public abstract CommandResult Process(string line, string channel, string sender);
+        public abstract CommandResult Process(string line, string sender);
 
         /// <summary>
         /// 

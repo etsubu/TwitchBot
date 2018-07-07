@@ -13,6 +13,7 @@ namespace TwitchBot.Commands.Permissions
     internal class PermissionManager
     {
         private readonly Dictionary<ChannelUsernamePair, int> permissions;
+        public const int MaxPermission = 10;
 
         /// <summary>
         /// Initializes PermissionManager
@@ -23,13 +24,16 @@ namespace TwitchBot.Commands.Permissions
         }
 
         /// <summary>
-        /// Queries user permission for a specific channel
+        /// Queries user permission for a specific channel. Channel owner has always MaxPermission
         /// </summary>
         /// <param name="channel">Channel to look for users permission in</param>
         /// <param name="username">User whose permission to retrieve</param>
         /// <returns></returns>
         public int QueryPermission(string channel, string username)
         {
+            // If the user is channel owner. Return MaxPermission
+            if (channel.Equals("#" + username))
+                return MaxPermission;
             var pair = new ChannelUsernamePair(channel, username, false);
             lock (permissions)
             {
@@ -65,7 +69,9 @@ namespace TwitchBot.Commands.Permissions
                 if (permissions.ContainsKey(pair))
                     permissions[pair] = permission;
                 else
+                {
                     permissions.Add(pair, permission);
+                }
             }
         }
 

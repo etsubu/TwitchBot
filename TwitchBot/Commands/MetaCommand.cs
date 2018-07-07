@@ -16,6 +16,11 @@ namespace TwitchBot.Commands
         public override bool IsRemoveable => false;
 
         /// <summary>
+        /// MetaCommand is not global command
+        /// </summary>
+        public override bool IsGlobal => false;
+
+        /// <summary>
         /// Initializes MetaCommand
         /// </summary>
         public MetaCommand(CommandHandler handler) : base(handler, "command", 1)
@@ -28,7 +33,7 @@ namespace TwitchBot.Commands
         /// <param name="line">Line to process</param>
         /// <param name="sender">sender name</param>
         /// <returns></returns>
-        public override CommandResult Process(string line, string channel, string sender)
+        public override CommandResult Process(string line, string sender)
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)
