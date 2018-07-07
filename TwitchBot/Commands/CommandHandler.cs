@@ -28,34 +28,34 @@ namespace TwitchBot.Commands
 
             commands = new Dictionary<string, Command>();
             permissionManager = new PermissionManager();
+            BroadcastCommand broadcast = new BroadcastCommand(irc, "#" + channelOwner, this);
 
             var services = new ServiceCollection()
                 .AddSingleton(irc)
-                .AddSingleton<MetaCommand>()
-                .AddSingleton<UptimeCommand>()
-                .AddSingleton<PermissionCommand>()
-                .AddSingleton(srv => new BroadcastCommand(
-                    srv.GetRequiredService<IRC>(),
-                    "#" + channelOwner,
-                    this))
-                .AddSingleton(this);
+                .AddSingleton<Command, MetaCommand>()
+                .AddSingleton<Command, UptimeCommand>()
+                .AddSingleton<Command, PermissionCommand>()
+                .AddSingleton<Command, BroadcastCommand>()
+                .AddSingleton(this)
+                .AddSingleton(permissionManager)
+                .AddSingleton("#" + channelOwner);
 
             var provider = services.BuildServiceProvider();
 
             // instantiate/initialise commands by fetching them from the DI provider
             // BroadcastCommand is instantiated when its added as a singleton
-            provider.GetRequiredService<UptimeCommand>();
-            provider.GetRequiredService<MetaCommand>();
+            //provider.GetRequiredService<UptimeCommand>();
+            //provider.GetRequiredService<MetaCommand>();
 
             // TODO: global permissions for PermissionManager
             //var permission = provider.GetRequiredService<PermissionCommand>();
             //permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
 
-            // TODO This does not currently work because apparently Command would have to be interface for it to work
-            //foreach (var command in provider.GetServices<Command>())
-            //{
-            //    commands.Add(command.Name, command);
-            //}
+            foreach (var command in provider.GetServices<Command>())
+            {
+                Console.WriteLine(command.Name);
+                commands.Add(command.Name, command);
+            }
         }
 
         private void InitCommand(Command command)

@@ -61,5 +61,10 @@ namespace TwitchBot.Commands
 
             return new CommandResult(false, "Invalid command");
         }
+
+        public override string Help()
+        {
+            return "";
+        }
     }
 }

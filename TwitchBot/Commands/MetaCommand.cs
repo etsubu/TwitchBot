@@ -55,5 +55,14 @@ namespace TwitchBot.Commands
 
             return new CommandResult(false, "Invalid command.");
         }
+
+        /// <summary>
+        /// Implements the help interface
+        /// </summary>
+        /// <returns>Help text</returns>
+        public override string Help()
+        {
+            return "Usage: !command list --- !command add [COMMAND_NAME] [COMMAND_RESPONSE] --- !command remove [COMMAND_NAME]";
+        }
     }
 }

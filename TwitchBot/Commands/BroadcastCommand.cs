@@ -172,5 +172,15 @@ namespace TwitchBot.Commands
 
             return new CommandResult(false, "Unknown command");
         }
+
+        /// <summary>
+        /// Implements help interface
+        /// </summary>
+        /// <returns>help text</returns>
+        public override string Help()
+        {
+            return "Usage: !broadcast list -- !broadcast add [TEXT_TO_BROADCAST] [DELAY_IN_SECONDS] --- " +
+                "!broadcast remove [ID_OF_BROADCASTMESSAGE]";
+        }
     }
 }

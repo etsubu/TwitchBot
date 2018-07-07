@@ -47,5 +47,14 @@ namespace TwitchBot.Commands
                 return new CommandResult(false, "Unknown command");
             }
         }
+
+        /// <summary>
+        /// Implements help interface
+        /// </summary>
+        /// <returns></returns>
+        public override string Help()
+        {
+            return "Usage: !uptime --- !uptime reset";
+        }
     }
 }

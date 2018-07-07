@@ -37,5 +37,14 @@ namespace TwitchBot.Commands
         {
             return new CommandResult(true, this.response);
         }
+
+        /// <summary>
+        /// Implement help interface
+        /// </summary>
+        /// <returns>Help text</returns>
+        public override string Help()
+        {
+            return "This a command with static response. Use " + Name;
+        }
     }
 }
