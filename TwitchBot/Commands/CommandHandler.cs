@@ -7,7 +7,7 @@ using TwitchBot.Commands.Permissions;
 namespace TwitchBot.Commands
 {
     /// <summary>
-    /// Processes all the commands sent for the bot
+    /// Processes all the commands sent for the bot in a single channel
     /// </summary>
     internal class CommandHandler
     {
@@ -37,7 +37,8 @@ namespace TwitchBot.Commands
                 .AddSingleton(srv => new BroadcastCommand(
                     srv.GetRequiredService<IRC>(),
                     "#" + channelOwner,
-                    this));
+                    this))
+                .AddSingleton(this);
 
             var provider = services.BuildServiceProvider();
 
@@ -50,8 +51,16 @@ namespace TwitchBot.Commands
             //var permission = provider.GetRequiredService<PermissionCommand>();
             //permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
 
-            foreach (var command in provider.GetServices<Command>())
-                commands.Add(command.Name, command);
+            // TODO This does not currently work because apparently Command would have to be interface for it to work
+            //foreach (var command in provider.GetServices<Command>())
+            //{
+            //    commands.Add(command.Name, command);
+            //}
+        }
+
+        private void InitCommand(Command command)
+        {
+            commands.Add(command.Name, command);
         }
 
         /// <summary>
