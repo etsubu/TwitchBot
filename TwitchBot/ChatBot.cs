@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using TwitchBot.Commands;
+using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot
 {
     internal class ChatBot : IDisposable
     {
         private readonly IRC irc;
-        private readonly CommandHandler commands;
         private List<Channel> Channels;
         private GlobalCommand globalCommand;
+        private PermissionManager permissionManager;
 
         /// <summary>
         /// Initializes ChatBot
@@ -27,13 +28,14 @@ namespace TwitchBot
                 configuration.Username,
                 configuration.OAuthToken);
             Channels = new List<Channel>();
+            permissionManager = new PermissionManager();
             globalCommand = new GlobalCommand(this);
 
-            for (int i = 0; i < configuration.Channels.Length; i++)
+            /*for (int i = 0; i < configuration.Channels.Length; i++)
             {
                 irc.JoinChannel(configuration.Channels[i]);
-                Channels.Add(new Channel(irc, configuration.Channels[i], globalCommand));
-            }
+                Channels.Add(new Channel(irc, configuration.Channels[i], globalCommand, permissionManager));
+            }*/
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace TwitchBot
             lock(this.Channels)
             {
                 irc.JoinChannel("#" + username);
-                Channels.Add(new Channel(irc, "#" + username, globalCommand));
+                Channels.Add(new Channel(irc, "#" + username, globalCommand, permissionManager));
                 irc.SendMessage("Joined channel KappaClaus");
             }
         }

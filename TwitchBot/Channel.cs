@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using TwitchBot.Commands;
+using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot
 {
@@ -19,11 +20,11 @@ namespace TwitchBot
         /// </summary>
         /// <param name="irc"></param>
         /// <param name="name"></param>
-        public Channel(IRC irc, string name, GlobalCommand globalCommand)
+        public Channel(IRC irc, string name, GlobalCommand globalCommand, PermissionManager permissionManager)
         {
             Name = name;
             chatListener = MessageReceived;
-            commandHandler = new CommandHandler(irc, name, globalCommand);
+            commandHandler = new CommandHandler(irc, name, globalCommand, permissionManager);
             irc.RegisterMessageCallback(this.MessageReceived, Name);
         }
 

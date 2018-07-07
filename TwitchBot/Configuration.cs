@@ -9,7 +9,10 @@
         },
         "channels": [
             ""
-        ] 
+        ]
+        "globalpermission": [
+            "name": permission
+        ]
     }
  */
 

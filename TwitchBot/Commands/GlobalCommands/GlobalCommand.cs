@@ -31,7 +31,7 @@ namespace TwitchBot.Commands
         {
             // TODO clean this up later
             string[] parts = line.Split(" ");
-            if(parts.Length > 2 && parts[1].Equals("Leave"))
+            if(parts.Length >= 2 && parts[1].Equals("Leave"))
             {
                 Bot.LeaveChannel(parts[2]);
                 return new CommandResult(true, "Left channel " + parts[2]);

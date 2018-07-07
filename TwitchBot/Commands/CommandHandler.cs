@@ -21,13 +21,14 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="irc">IRC object to use for sending messages</param>
         /// <param name="channelOwner">Name of the channel owner</param>
-        public CommandHandler(IRC irc, string channelOwner, GlobalCommand globalCommand)
+        /// <param name="permissionManager">PermissionManager object that contains all permission levels</param>
+        public CommandHandler(IRC irc, string channelOwner, GlobalCommand globalCommand, PermissionManager permissionManager)
         {
             this.irc = irc;
             this.channelOwner = channelOwner;
 
             commands = new Dictionary<string, Command>();
-            permissionManager = new PermissionManager();
+            this.permissionManager = permissionManager;
             BroadcastCommand broadcast = new BroadcastCommand(irc, "#" + channelOwner);
 
             var services = new ServiceCollection()
