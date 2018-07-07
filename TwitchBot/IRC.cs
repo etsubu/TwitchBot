@@ -206,6 +206,23 @@ namespace TwitchBot
         }
 
         /// <summary>
+        /// Leaves the given channel and removes all listeners associated with it
+        /// </summary>
+        /// <param name="channel"></param>
+        public void LeaveChannel(string channel)
+        {
+            lock(writer)
+            {
+                writer.Write($"LEAVE {channel}\r\n");
+                writer.Flush();
+            }
+            lock(callbacks)
+            {
+                callbacks.Remove(channel);
+            }
+        }
+
+        /// <summary>
         /// Parses a single IRC message to its corresponding parts
         /// </summary>
         /// <param name="rawMessage">Raw representation of a single IRC message</param>

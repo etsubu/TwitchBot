@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TwitchBot.Commands;
 
 namespace TwitchBot
@@ -7,7 +8,8 @@ namespace TwitchBot
     {
         private readonly IRC irc;
         private readonly CommandHandler commands;
-        private readonly Channel[] channels;
+        private List<Channel> Channels;
+        private GlobalCommand globalCommand;
 
         /// <summary>
         /// Initializes ChatBot
@@ -24,13 +26,66 @@ namespace TwitchBot
                 configuration.Connection.Port,
                 configuration.Username,
                 configuration.OAuthToken);
-            channels = new Channel[configuration.Channels.Length];
+            Channels = new List<Channel>();
+            globalCommand = new GlobalCommand(this);
 
-            for(int i = 0; i < configuration.Channels.Length; i++)
+            for (int i = 0; i < configuration.Channels.Length; i++)
             {
                 irc.JoinChannel(configuration.Channels[i]);
-                channels[i] = new Channel(irc, configuration.Channels[i]);
+                Channels.Add(new Channel(irc, configuration.Channels[i], globalCommand));
             }
+        }
+
+        /// <summary>
+        /// Broadcasts a global message to all channel currently joined
+        /// </summary>
+        /// <param name="message">Message to be broadcasted</param>
+        public void BroadcastToChannels(string message)
+        {
+            lock(this.Channels)
+            {
+                foreach (Channel channel in Channels)
+                {
+                    irc.SendMessage("[GLOBAL]: " + message, channel.Name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Joins a new channel
+        /// </summary>
+        /// <param name="username">User whose channel to join</param>
+        public void JoinToChannel(string username)
+        {
+            lock(this.Channels)
+            {
+                irc.JoinChannel("#" + username);
+                Channels.Add(new Channel(irc, "#" + username, globalCommand));
+                irc.SendMessage("Joined channel KappaClaus");
+            }
+        }
+
+        /// <summary>
+        /// Leaves the given channel and removes listeners associated with it
+        /// </summary>
+        /// <param name="username">User whose channel to leave</param>
+        /// <returns>True if bot was joined and has now left, false if it wasn't in the channel</returns>
+        public bool LeaveChannel(string username)
+        {
+            lock(this.Channels)
+            {
+                for(int i = 0; i < Channels.Count; i++)
+                {
+                    if(username.ToLower().Equals(Channels[i].Name.ToLower()))
+                    {
+                        irc.SendMessage("Leaving channel... bye bye BibleThump");
+                        Channels.RemoveAt(i);
+                        irc.LeaveChannel("#" + username);
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>

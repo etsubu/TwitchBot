@@ -10,7 +10,7 @@ namespace TwitchBot
     /// </summary>
     internal class Channel
     {
-        private readonly string name;
+        public readonly string Name;
         private CommandHandler commandHandler;
         private Action<ChatMessage> chatListener;
 
@@ -19,12 +19,12 @@ namespace TwitchBot
         /// </summary>
         /// <param name="irc"></param>
         /// <param name="name"></param>
-        public Channel(IRC irc, string name)
+        public Channel(IRC irc, string name, GlobalCommand globalCommand)
         {
-            this.name = name;
-            this.chatListener = MessageReceived;
-            this.commandHandler = new CommandHandler(irc, name);
-            irc.RegisterMessageCallback(this.MessageReceived, this.name);
+            Name = name;
+            chatListener = MessageReceived;
+            commandHandler = new CommandHandler(irc, name, globalCommand);
+            irc.RegisterMessageCallback(this.MessageReceived, Name);
         }
 
         /// <summary>

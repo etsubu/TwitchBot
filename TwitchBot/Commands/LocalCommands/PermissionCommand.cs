@@ -24,17 +24,17 @@ namespace TwitchBot.Commands
         public override bool IsGlobal => false;
 
         private readonly PermissionManager permissionManager;
-        private readonly string channel;
+        private readonly string Channel;
 
         /// <summary>
         /// Initializes PermissionsCommand
         /// <param name="handler">Ununsed by the PermissionCommand</param>
         /// <param name="permission">PermissionManager for requesting actual permissions from</param>
         /// </summary>
-        public PermissionCommand(PermissionManager permissionManager, CommandHandler handler) : base(handler, "permission")
+        public PermissionCommand(PermissionManager permissionManager, string channel) : base("permission")
         {
             this.permissionManager = permissionManager;
-            this.channel = "#" + handler.channelOwner;
+            this.Channel = channel;
         }
 
         /// <summary>
@@ -65,13 +65,13 @@ namespace TwitchBot.Commands
                 // updated permission must be lower than his own
                 // => you cannot change someones permission if he has the same level as you
                 // and you cannot make someone the same permission level as you
-                int senderPermission = permissionManager.QueryPermission(channel, sender);
-                int personToBeUpdatedPermission = permissionManager.QueryPermission(channel, name);
+                int senderPermission = permissionManager.QueryPermission(Channel, sender);
+                int personToBeUpdatedPermission = permissionManager.QueryPermission(Channel, name);
                 if (senderPermission > personToBeUpdatedPermission)
                 {
                     if (permission < senderPermission)
                     {
-                        permissionManager.UpdatePermission(Handler.channelOwner, name, permission);
+                        permissionManager.UpdatePermission(Channel, name, permission);
                         return new CommandResult(true, $"Permission for {name} set to {permission}");
                     }
                     return new CommandResult(false, $"{sender} The permission you set for others must be lower than yours");
@@ -83,7 +83,7 @@ namespace TwitchBot.Commands
 
             if (command.Equals("query") && parts.Length == 3)
             {
-                return new CommandResult(true, $"Permission for {name} is {permissionManager.QueryPermission(Handler.channelOwner, name)}");
+                return new CommandResult(true, $"Permission for {name} is {permissionManager.QueryPermission(Channel, name)}");
             }
 
             return new CommandResult(false, "Invalid command");

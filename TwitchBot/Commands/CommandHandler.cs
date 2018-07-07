@@ -21,14 +21,14 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="irc">IRC object to use for sending messages</param>
         /// <param name="channelOwner">Name of the channel owner</param>
-        public CommandHandler(IRC irc, string channelOwner)
+        public CommandHandler(IRC irc, string channelOwner, GlobalCommand globalCommand)
         {
             this.irc = irc;
             this.channelOwner = channelOwner;
 
             commands = new Dictionary<string, Command>();
             permissionManager = new PermissionManager();
-            BroadcastCommand broadcast = new BroadcastCommand(irc, "#" + channelOwner, this);
+            BroadcastCommand broadcast = new BroadcastCommand(irc, "#" + channelOwner);
 
             var services = new ServiceCollection()
                 .AddSingleton(irc)
@@ -47,15 +47,13 @@ namespace TwitchBot.Commands
             //provider.GetRequiredService<UptimeCommand>();
             //provider.GetRequiredService<MetaCommand>();
 
-            // TODO: global permissions for PermissionManager
-            //var permission = provider.GetRequiredService<PermissionCommand>();
-            //permission.SetPermission(channelOwner, PermissionCommand.MaxPermission);
-
             foreach (var command in provider.GetServices<Command>())
             {
                 Console.WriteLine(command.Name);
                 commands.Add(command.Name, command);
             }
+            // Add global command
+            commands.Add(globalCommand.Name, globalCommand);
         }
 
         private void InitCommand(Command command)
@@ -161,7 +159,7 @@ namespace TwitchBot.Commands
                 if (commands.ContainsKey(key))
                     return false;
 
-                BasicCommand cmd = new BasicCommand(key, response, this);
+                BasicCommand cmd = new BasicCommand(key, response);
                 commands[cmd.Name] = cmd;
             }
 

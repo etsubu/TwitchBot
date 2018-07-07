@@ -20,11 +20,13 @@ namespace TwitchBot.Commands
         /// </summary>
         public override bool IsGlobal => false;
 
+        private CommandHandler Handler;
         /// <summary>
         /// Initializes MetaCommand
         /// </summary>
-        public MetaCommand(CommandHandler handler) : base(handler, "command", 1)
+        public MetaCommand(CommandHandler handler) : base("command", 1)
         {
+            Handler = handler;
         }
 
         /// <summary>

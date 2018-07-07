@@ -27,7 +27,7 @@ namespace TwitchBot.Commands
         /// Initializes UptimeCommand
         /// <param name="handler">Ununsed by the UptimeCommand</param>
         /// </summary>
-        public UptimeCommand(CommandHandler handler) : base(handler, "uptime")
+        public UptimeCommand() : base("uptime")
         {
             startTime = DateTimeOffset.UtcNow;
         }

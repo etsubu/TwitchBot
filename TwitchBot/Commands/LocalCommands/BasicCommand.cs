@@ -27,7 +27,7 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="name">Name/Identifier that belongs to this command</param>
         /// <param name="response">Statis response when this command is called</param>
-        public BasicCommand(string name, string response, CommandHandler handler) : base(handler, name)
+        public BasicCommand(string name, string response) : base(name)
         {
             this.response = response;
         }

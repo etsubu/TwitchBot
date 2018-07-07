@@ -28,13 +28,13 @@ namespace TwitchBot.Commands
 
         private readonly string name;
         private readonly int RequiredPermission;
-        protected readonly CommandHandler Handler;
+        //protected readonly CommandHandler Handler;
 
         /// <summary>
         /// Initializes the Command 
         /// </summary>
         /// <param name="name">The identifier of the command</param>
-        public Command(CommandHandler handler, string name) : this(handler, name, 0)
+        public Command(string name) : this(name, 0)
         {
         }
 
@@ -43,9 +43,9 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="name">The identifier of the command</param>
         /// <param name="requiredPermission">Required permission level for the command</param>
-        public Command(CommandHandler handler, string name, int requiredPermission)
+        public Command(string name, int requiredPermission)
         {
-            Handler = handler;
+            //Handler = handler;
             this.name = name;
             this.RequiredPermission = requiredPermission;
         }
