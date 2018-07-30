@@ -12,16 +12,9 @@ namespace TwitchBot
         private GlobalCommand globalCommand;
         private PermissionManager permissionManager;
 
-        /// <summary>
-        /// Initializes ChatBot
-        /// </summary>
-        private ChatBot()
+        public ChatBot(Configuration configuration)
         {
             irc = new IRC();
-        }
-
-        public ChatBot(Configuration configuration) : this()
-        {
             irc.ConnectServer(
                 configuration.Connection.Host,
                 configuration.Connection.Port,
@@ -31,11 +24,15 @@ namespace TwitchBot
             permissionManager = new PermissionManager();
             globalCommand = new GlobalCommand(this);
 
-            /*for (int i = 0; i < configuration.Channels.Length; i++)
+            Channel ownChannel = new Channel(irc, configuration.Username, globalCommand, permissionManager);
+            Channels.Add(ownChannel);
+            irc.JoinChannel(configuration.Username);
+
+            for (int i = 0; i < configuration.Channels.Length; i++)
             {
                 irc.JoinChannel(configuration.Channels[i]);
                 Channels.Add(new Channel(irc, configuration.Channels[i], globalCommand, permissionManager));
-            }*/
+            }
         }
 
         /// <summary>

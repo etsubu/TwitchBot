@@ -60,7 +60,6 @@ namespace TwitchBot.Commands
             }
 
             tickCount++;
-            Console.WriteLine(tickCount);
         }
 
         /// <summary>

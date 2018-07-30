@@ -47,6 +47,8 @@ namespace TwitchBot
         /// <returns></returns>
         public bool RegisterMessageCallback(Action<ChatMessage> callback, string channel)
         {
+            if (!channel.StartsWith("#"))
+                channel = "#" + channel;
             lock(callbacks)
             {
                 if(!callbacks.ContainsKey(channel))
@@ -198,6 +200,8 @@ namespace TwitchBot
         /// <param name="channel">Name of the channel to join</param>
         public void JoinChannel(string channel)
         {
+            if (!channel.StartsWith("#"))
+                channel = "#" + channel;
             lock (writer)
             {
                 writer.Write($"JOIN {channel}\r\n");
