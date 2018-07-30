@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
+using TwitchBot.Commands.LocalCommands;
 using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot.Commands
@@ -39,6 +40,8 @@ namespace TwitchBot.Commands
                 .AddSingleton<Command, UptimeCommand>()
                 .AddSingleton<Command, PermissionCommand>()
                 .AddSingleton<Command, BroadcastCommand>()
+                .AddSingleton<Command, AuthorCommand>()
+                .AddSingleton<Command, HelpCommand>()
                 .AddSingleton(this)
                 .AddSingleton(permissionManager)
                 .AddSingleton(channelName);
@@ -172,6 +175,25 @@ namespace TwitchBot.Commands
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Retrieves help text for a command if it exists
+        /// </summary>
+        /// <param name="commandName">Name of the command to get help text for</param>
+        /// <returns>CommandResult containing the help text if the command exists</returns>
+        public CommandResult GetHelp(string commandName)
+        {
+            // Remove prefix if it exists and force to lowercase
+            commandName = (commandName.StartsWith("!") ? commandName.ToLower().Substring(1) : commandName.ToLower());
+            lock (commands)
+            {
+                if (commands.ContainsKey(commandName))
+                {
+                    return new CommandResult(true, commands[commandName].Help());
+                }
+                return new CommandResult(false, "Unknown command name: " + commandName + " use !command list to display available commands");
+            }
         }
     }
 }

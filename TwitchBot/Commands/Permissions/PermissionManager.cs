@@ -13,7 +13,7 @@ namespace TwitchBot.Commands.Permissions
     internal class PermissionManager
     {
         private readonly Dictionary<ChannelUsernamePair, int> permissions;
-        public const int MaxPermission = 10;
+        public const int MaxPermission = 9;
         private Database database;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace TwitchBot.Commands.Permissions
         {
             this.database = database;
             permissions = database.QueryPermissions();
-            permissions.Add(new ChannelUsernamePair(new ChannelName(), owner, true), MaxPermission);
+            permissions.Add(new ChannelUsernamePair(new ChannelName(), owner, true), MaxPermission + 1);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace TwitchBot.Commands.Permissions
         public int QueryPermission(ChannelName channel, string username)
         {
             // If the user is channel owner. Return MaxPermission
-            if (channel.Equals(new ChannelName("#" + username)))
+            if (channel.Equals(new ChannelName(username)))
                 return MaxPermission;
             var pair = new ChannelUsernamePair(channel, username, false);
             lock (permissions)
