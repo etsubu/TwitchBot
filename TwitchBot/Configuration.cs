@@ -3,16 +3,11 @@
  *  {
         "username": "",
         "oauth": "oauth:---------------------",
+        "owner": "",
         "connection": {
             "host": "irc.twitch.tv",
             "port": 6667
         },
-        "channels": [
-            ""
-        ]
-        "globalpermission": [
-            "name": permission
-        ]
     }
  */
 
@@ -40,15 +35,15 @@ namespace TwitchBot
         public string Username { get; }
         [JsonProperty("oauth")]
         public string OAuthToken { get; }
+        public string Owner { get; }
         public Connection Connection { get; }
-        public string[] Channels { get; }
 
-        public Configuration(string username, string oauthToken, Connection connection, string[] channels)
+        public Configuration(string username, string oauthToken, string owner, Connection connection)
         {
-            Username = username;
+            Username = username.ToLower();
             OAuthToken = oauthToken;
+            Owner = owner.ToLower();
             Connection = connection;
-            Channels = channels;
         }
     }
 }

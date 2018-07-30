@@ -24,14 +24,14 @@ namespace TwitchBot.Commands
         public override bool IsGlobal => false;
 
         private readonly PermissionManager permissionManager;
-        private readonly string Channel;
+        private readonly ChannelName Channel;
 
         /// <summary>
         /// Initializes PermissionsCommand
         /// <param name="handler">Ununsed by the PermissionCommand</param>
         /// <param name="permission">PermissionManager for requesting actual permissions from</param>
         /// </summary>
-        public PermissionCommand(PermissionManager permissionManager, string channel) : base("permission")
+        public PermissionCommand(PermissionManager permissionManager, ChannelName channel) : base("permission")
         {
             this.permissionManager = permissionManager;
             this.Channel = channel;

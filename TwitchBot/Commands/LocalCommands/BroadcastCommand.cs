@@ -17,7 +17,7 @@ namespace TwitchBot.Commands
         /// </summary>
         public override bool IsGlobal => false;
 
-        public string Channel { get; }
+        public ChannelName Channel { get; }
 
         private readonly IRC irc;
         private readonly List<BroadcastMessage> messages;
@@ -29,7 +29,7 @@ namespace TwitchBot.Commands
         /// </summary>
         /// <param name="irc">IRC object to use for sending broadcast messages</param>
         /// <param name="channel">Channel to send the broadcast messages to</param>
-        public BroadcastCommand(IRC irc, string channel):base("broadcast", 1)
+        public BroadcastCommand(IRC irc, ChannelName channel):base("broadcast", 1)
         {
             this.irc = irc;
             this.Channel = channel;

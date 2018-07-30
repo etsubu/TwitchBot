@@ -8,7 +8,7 @@ namespace TwitchBot
     internal class ChatMessage
     {
         public string Sender { get; }
-        public string Channel { get; }
+        public ChannelName Channel { get; }
         public string Message { get; }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace TwitchBot
             {
                 throw new ArgumentException();
             }
-            Channel = message.Parameters[0];
+            Channel = new ChannelName(message.Parameters[0]);
             Message = message.Trailing;
         }
     }

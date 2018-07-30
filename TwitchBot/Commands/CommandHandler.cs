@@ -14,7 +14,8 @@ namespace TwitchBot.Commands
         private readonly Dictionary<string, Command> commands;
         private readonly PermissionManager permissionManager;
         private readonly IRC irc;
-        public readonly string channelOwner;
+        public readonly ChannelName channelName;
+        private Database database;
 
         /// <summary>
         /// Initializes CommandHandler
@@ -22,14 +23,15 @@ namespace TwitchBot.Commands
         /// <param name="irc">IRC object to use for sending messages</param>
         /// <param name="channelOwner">Name of the channel owner</param>
         /// <param name="permissionManager">PermissionManager object that contains all permission levels</param>
-        public CommandHandler(IRC irc, string channelOwner, GlobalCommand globalCommand, PermissionManager permissionManager)
+        public CommandHandler(IRC irc, ChannelName channelName, GlobalCommand globalCommand, PermissionManager permissionManager, Database database)
         {
             this.irc = irc;
-            this.channelOwner = channelOwner;
+            this.channelName = channelName;
+            this.database = database;
 
-            commands = new Dictionary<string, Command>();
+            commands = database.QueryBasicCommands(channelName); // Load the initial basic commands from the database
             this.permissionManager = permissionManager;
-            BroadcastCommand broadcast = new BroadcastCommand(irc, "#" + channelOwner);
+            BroadcastCommand broadcast = new BroadcastCommand(irc, channelName);
 
             var services = new ServiceCollection()
                 .AddSingleton(irc)
@@ -39,7 +41,7 @@ namespace TwitchBot.Commands
                 .AddSingleton<Command, BroadcastCommand>()
                 .AddSingleton(this)
                 .AddSingleton(permissionManager)
-                .AddSingleton("#" + channelOwner);
+                .AddSingleton(channelName);
 
             var provider = services.BuildServiceProvider();
 
@@ -55,11 +57,6 @@ namespace TwitchBot.Commands
             }
             // Add global command
             commands.Add(globalCommand.Name, globalCommand);
-        }
-
-        private void InitCommand(Command command)
-        {
-            commands.Add(command.Name, command);
         }
 
         /// <summary>
@@ -85,11 +82,10 @@ namespace TwitchBot.Commands
         /// <param name="sender">Name of the user who sent the command</param>
         /// <param name="channel">channel the message was sent to</param>
         /// <returns>True if the command was processed, false if failed</returns>
-        public bool ProcessCommand(string line, string sender, string channel)
+        public bool ProcessCommand(string line, string sender, ChannelName channel)
         {
             if (line.Length < 2 || line[0] != '!')
                 return false;
-
             line = line.Substring(1);
             int index = line.IndexOf(" ", StringComparison.Ordinal);
 
@@ -112,7 +108,7 @@ namespace TwitchBot.Commands
                 bool hasPermission = false;
                 hasPermission = (commands[name].IsGlobal) ? 
                     commands[name].HasPermission(permissionManager.QueryGlobalPermission(sender))
-                    : commands[name].HasPermission(permissionManager.QueryPermission(channel, sender));
+                    : commands[name].HasPermission(permissionManager.QueryPermission(channelName, sender));
 
                 if (!hasPermission)
                 {
@@ -139,7 +135,7 @@ namespace TwitchBot.Commands
                     return false;
 
                 //Built in commands are not removeable
-                if (commands[key].IsRemoveable)
+                if (commands[key].IsRemoveable && database.RemoveBasicCommand(channelName, key))
                     return commands.Remove(key);
 
                 return false;
@@ -156,15 +152,26 @@ namespace TwitchBot.Commands
         {
             lock(commands)
             {
-                //Only add the command if it doesn't already exist
-                if (commands.ContainsKey(key))
-                    return false;
-
                 BasicCommand cmd = new BasicCommand(key, response);
-                commands[cmd.Name] = cmd;
+                // If the command exists try to update it
+                if (commands.ContainsKey(key))
+                {
+                    // Try to update the command to database
+                    if(database.UpdateBasicCommand(channelName, key, response))
+                    {
+                        // Overwrite the existing command
+                        commands[cmd.Name] = new BasicCommand(key, response);
+                        return true;
+                    }
+                    return false;
+                }
+                if (database.AddBasicCommand(channelName, key, response))
+                {
+                    commands[cmd.Name] = cmd;
+                    return true;
+                }
             }
-
-            return true;
+            return false;
         }
     }
 }

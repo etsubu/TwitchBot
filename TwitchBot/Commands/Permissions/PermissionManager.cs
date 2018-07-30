@@ -14,13 +14,18 @@ namespace TwitchBot.Commands.Permissions
     {
         private readonly Dictionary<ChannelUsernamePair, int> permissions;
         public const int MaxPermission = 10;
+        private Database database;
 
         /// <summary>
         /// Initializes PermissionManager
+        /// <param name="database">Database object to use for synchronizing and querying permission levels</param>
+        /// <param name="owner">Owner of this bot will have global permission of level 10</param>
         /// </summary>
-        public PermissionManager()
+        public PermissionManager(Database database, string owner)
         {
-            permissions = new Dictionary<ChannelUsernamePair, int>();
+            this.database = database;
+            permissions = database.QueryPermissions();
+            permissions.Add(new ChannelUsernamePair(new ChannelName(), owner, true), MaxPermission);
         }
 
         /// <summary>
@@ -29,10 +34,10 @@ namespace TwitchBot.Commands.Permissions
         /// <param name="channel">Channel to look for users permission in</param>
         /// <param name="username">User whose permission to retrieve</param>
         /// <returns></returns>
-        public int QueryPermission(string channel, string username)
+        public int QueryPermission(ChannelName channel, string username)
         {
             // If the user is channel owner. Return MaxPermission
-            if (channel.Equals("#" + username))
+            if (channel.Equals(new ChannelName("#" + username)))
                 return MaxPermission;
             var pair = new ChannelUsernamePair(channel, username, false);
             lock (permissions)
@@ -48,7 +53,7 @@ namespace TwitchBot.Commands.Permissions
         /// <returns></returns>
         public int QueryGlobalPermission(string username)
         {
-            var pair = new ChannelUsernamePair("", username, true);
+            var pair = new ChannelUsernamePair(new ChannelName(), username, true);
             lock (permissions)
             {
                 return permissions.TryGetValue(pair, out var permission) ? permission : 0;
@@ -61,16 +66,28 @@ namespace TwitchBot.Commands.Permissions
         /// <param name="channel">Channel in which the permission is to be updated</param>
         /// <param name="username">User whose permission will be updated</param>
         /// <param name="permission">Permission level to set</param>
-        public void UpdatePermission(string channel, string username, int permission)
+        public void UpdatePermission(ChannelName channel, string username, int permission)
         {
             var pair = new ChannelUsernamePair(channel, username, false);
             lock (permissions)
             {
                 if (permissions.ContainsKey(pair))
-                    permissions[pair] = permission;
-                else
+                {
+                    if (permission == 0)
+                    {
+                        permissions.Remove(pair);
+                        database.DeletePermission(pair);
+                    }
+                    else
+                    {
+                        permissions[pair] = permission;
+                        database.UpdatePermission(pair, permission);
+                    }
+                }
+                else if (permission > 0)
                 {
                     permissions.Add(pair, permission);
+                    database.AddPermission(pair, permission);
                 }
             }
         }
@@ -82,13 +99,27 @@ namespace TwitchBot.Commands.Permissions
         /// <param name="permission">Global permission level to set</param>
         public void UpdatePermissionGlobal(string username, int permission)
         {
-            var pair = new ChannelUsernamePair("", username, true);
+            var pair = new ChannelUsernamePair(new ChannelName(), username, true);
             lock (permissions)
             {
                 if (permissions.ContainsKey(pair))
-                    permissions[pair] = permission;
-                else
+                {
+                    if (permission == 0)
+                    {
+                        permissions.Remove(pair);
+                        database.DeletePermission(pair);
+                    }
+                    else
+                    {
+                        permissions[pair] = permission;
+                        database.UpdatePermission(pair, permission);
+                    }
+                }
+                else if (permission > 0)
+                {
                     permissions.Add(pair, permission);
+                    database.AddPermission(pair, permission);
+                }
             }
         }
     }

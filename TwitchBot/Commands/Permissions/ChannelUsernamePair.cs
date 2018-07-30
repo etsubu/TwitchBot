@@ -5,7 +5,7 @@ namespace TwitchBot.Commands.Permissions
     internal struct ChannelUsernamePair
     {
         // the struct is completely immutable
-        public readonly string Channel;
+        public readonly ChannelName Channel;
         public readonly string Username;
         public readonly bool IsGlobal;
 
@@ -15,7 +15,7 @@ namespace TwitchBot.Commands.Permissions
         /// <param name="channel">Channel name this user is for</param>
         /// <param name="username">Username</param>
         /// <param name="isGlobal">True if the channel should be ignored</param>
-        public ChannelUsernamePair(string channel, string username, bool isGlobal)
+        public ChannelUsernamePair(ChannelName channel, string username, bool isGlobal)
         {
             Channel = channel;
             Username = username;
@@ -24,7 +24,7 @@ namespace TwitchBot.Commands.Permissions
 
         // two ChannelUsernamePairs are considered equal if their Channel and Username match
         public bool Equals(ChannelUsernamePair other) => 
-            string.Equals(Channel, other.Channel) && string.Equals(Username, other.Username) && IsGlobal == other.IsGlobal;
+            ChannelName.Equals(Channel, other.Channel) && string.Equals(Username, other.Username) && IsGlobal == other.IsGlobal;
 
         public override bool Equals(object obj)
         {

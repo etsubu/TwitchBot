@@ -16,14 +16,14 @@ namespace TwitchBot
         private StreamReader reader;
         private StreamWriter writer;
         private Thread listenerThread;
-        private Dictionary<string, List<Action<ChatMessage>>> callbacks;
+        private Dictionary<ChannelName, List<Action<ChatMessage>>> callbacks;
 
         /// <summary>
         /// Initialises a new IRC instance
         /// </summary>
         public IRC()
         {
-            this.callbacks = new Dictionary<string, List<Action<ChatMessage>>>();
+            this.callbacks = new Dictionary<ChannelName, List<Action<ChatMessage>>>();
         }
 
         /// <summary>
@@ -45,10 +45,8 @@ namespace TwitchBot
         /// <param name="callback">Callback to invoke for messages</param>
         /// <param name="channel">Channel to register the callback for</param>
         /// <returns></returns>
-        public bool RegisterMessageCallback(Action<ChatMessage> callback, string channel)
+        public bool RegisterMessageCallback(Action<ChatMessage> callback, ChannelName channel)
         {
-            if (!channel.StartsWith("#"))
-                channel = "#" + channel;
             lock(callbacks)
             {
                 if(!callbacks.ContainsKey(channel))
@@ -67,7 +65,7 @@ namespace TwitchBot
         /// <param name="callback">Callback to unregister</param>
         /// <param name="channel">Channel the callback was attached to</param>
         /// <returns></returns>
-        public bool UnregisterMessageCallback(Action<ChatMessage> callback, string channel)
+        public bool UnregisterMessageCallback(Action<ChatMessage> callback, ChannelName channel)
         {
             lock(callbacks)
             {
@@ -145,7 +143,7 @@ namespace TwitchBot
         /// </summary>
         /// <param name="message">Message to send</param>
         /// <param name="channel">Channel to send the message to</param>
-        public void SendMessage(string message, string channel)
+        public void SendMessage(string message, ChannelName channel)
         {
             lock (writer)
             {
@@ -183,9 +181,11 @@ namespace TwitchBot
                         continue;
                     }
                     lock (callbacks) {
+                        Console.WriteLine(chatMessage.Channel);
                         if (callbacks.ContainsKey(chatMessage.Channel)) {
                             foreach (Action<ChatMessage> callback in callbacks[chatMessage.Channel])
                             {
+                                Console.WriteLine("callback invoke");
                                 callback.Invoke(chatMessage);
                             }
                         }
@@ -198,10 +198,8 @@ namespace TwitchBot
         /// Tries to join a channel
         /// </summary>
         /// <param name="channel">Name of the channel to join</param>
-        public void JoinChannel(string channel)
+        public void JoinChannel(ChannelName channel)
         {
-            if (!channel.StartsWith("#"))
-                channel = "#" + channel;
             lock (writer)
             {
                 writer.Write($"JOIN {channel}\r\n");
@@ -213,11 +211,11 @@ namespace TwitchBot
         /// Leaves the given channel and removes all listeners associated with it
         /// </summary>
         /// <param name="channel"></param>
-        public void LeaveChannel(string channel)
+        public void LeaveChannel(ChannelName channel)
         {
             lock(writer)
             {
-                writer.Write($"LEAVE {channel}\r\n");
+                writer.Write($"PART {channel}\r\n");
                 writer.Flush();
             }
             lock(callbacks)

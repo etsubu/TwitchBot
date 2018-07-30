@@ -1,4 +1,6 @@
-﻿namespace TwitchBot
+﻿using System;
+
+namespace TwitchBot
 {
     /// <summary>
     /// Initializes the program
@@ -11,7 +13,13 @@
         /// <param name="args">Currently unused</param>
         static void Main(string[] args)
         {
-            using (var bot = new ChatBot(Configuration.LoadFromJson("config.json")))
+            Database database = new Database();
+            /*database.QueryPermissions();
+            if (database.AddPermission(new Commands.Permissions.ChannelUsernamePair("#nagrodus", "nagrodus", false), 10))
+                Console.WriteLine("done");
+            Console.Read();
+            */
+            using (var bot = new ChatBot(Configuration.LoadFromJson("config.json"), database))
             {
                 bot.WaitForExit();
             }

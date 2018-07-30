@@ -31,9 +31,9 @@ namespace TwitchBot.Commands
         {
             // TODO clean this up later
             string[] parts = line.Split(" ");
-            if(parts.Length >= 2 && parts[1].Equals("Leave"))
+            if(parts.Length > 2 && parts[1].Equals("leave"))
             {
-                Bot.LeaveChannel(parts[2]);
+                Bot.LeaveChannel(new ChannelName(parts[2]));
                 return new CommandResult(true, "Left channel " + parts[2]);
             } else if (parts.Length > 2 && parts[1].Equals("broadcast"))
             {

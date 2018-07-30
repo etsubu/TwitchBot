@@ -11,9 +11,12 @@ namespace TwitchBot
         private List<Channel> Channels;
         private GlobalCommand globalCommand;
         private PermissionManager permissionManager;
+        private Database database;
 
-        public ChatBot(Configuration configuration)
+        public ChatBot(Configuration configuration, Database database)
         {
+            this.database = database;
+            ChannelName ownChannelName = new ChannelName(configuration.Username);
             irc = new IRC();
             irc.ConnectServer(
                 configuration.Connection.Host,
@@ -21,18 +24,22 @@ namespace TwitchBot
                 configuration.Username,
                 configuration.OAuthToken);
             Channels = new List<Channel>();
-            permissionManager = new PermissionManager();
+            permissionManager = new PermissionManager(database, configuration.Owner);
             globalCommand = new GlobalCommand(this);
 
-            Channel ownChannel = new Channel(irc, configuration.Username, globalCommand, permissionManager);
+            irc.JoinChannel(ownChannelName);
+            Channel ownChannel = new Channel(irc, ownChannelName, globalCommand, permissionManager, database);
             Channels.Add(ownChannel);
-            irc.JoinChannel(configuration.Username);
 
-            for (int i = 0; i < configuration.Channels.Length; i++)
+            List<string> channelNames = database.QueryChannels();
+            foreach (string channelName in channelNames)
             {
-                irc.JoinChannel(configuration.Channels[i]);
-                Channels.Add(new Channel(irc, configuration.Channels[i], globalCommand, permissionManager));
+                ChannelName channel = new ChannelName(channelName);
+                irc.JoinChannel(channel);
+                Channels.Add(new Channel(irc, channel, globalCommand, permissionManager, database));
+                Console.Write("joining " + channelName);
             }
+            Console.WriteLine("dsadas");
         }
 
         /// <summary>
@@ -58,9 +65,18 @@ namespace TwitchBot
         {
             lock(this.Channels)
             {
-                irc.JoinChannel("#" + username);
-                Channels.Add(new Channel(irc, "#" + username, globalCommand, permissionManager));
-                irc.SendMessage("Joined channel KappaClaus");
+                ChannelName channelName = new ChannelName(username);
+                foreach (Channel channel in Channels)
+                {
+                    if (channel.Name.Equals(channelName))
+                        return;
+                }
+                if (database.AddChannel(channelName))
+                {
+                    irc.JoinChannel(channelName);
+                    Channels.Add(new Channel(irc, channelName, globalCommand, permissionManager, database));
+                    irc.SendMessage("Joined channel KappaClaus", channelName);
+                }
             }
         }
 
@@ -69,18 +85,18 @@ namespace TwitchBot
         /// </summary>
         /// <param name="username">User whose channel to leave</param>
         /// <returns>True if bot was joined and has now left, false if it wasn't in the channel</returns>
-        public bool LeaveChannel(string username)
+        public bool LeaveChannel(ChannelName channel)
         {
             lock(this.Channels)
             {
                 for(int i = 0; i < Channels.Count; i++)
                 {
-                    if(username.ToLower().Equals(Channels[i].Name.ToLower()))
+                    if (channel.Equals(Channels[i].Name))
                     {
                         irc.SendMessage("Leaving channel... bye bye BibleThump");
                         Channels.RemoveAt(i);
-                        irc.LeaveChannel("#" + username);
-                        return true;
+                        irc.LeaveChannel(channel);
+                        return database.RemoveChannel(channel);
                     }
                 }
             }

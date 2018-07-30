@@ -11,7 +11,7 @@ namespace TwitchBot
     /// </summary>
     internal class Channel
     {
-        public readonly string Name;
+        public readonly ChannelName Name;
         private CommandHandler commandHandler;
         private Action<ChatMessage> chatListener;
 
@@ -20,11 +20,12 @@ namespace TwitchBot
         /// </summary>
         /// <param name="irc"></param>
         /// <param name="name"></param>
-        public Channel(IRC irc, string name, GlobalCommand globalCommand, PermissionManager permissionManager)
+        /// <param name="database">Database object to synchronize channel settings with</param>
+        public Channel(IRC irc, ChannelName name, GlobalCommand globalCommand, PermissionManager permissionManager, Database database)
         {
             Name = name;
             chatListener = MessageReceived;
-            commandHandler = new CommandHandler(irc, name, globalCommand, permissionManager);
+            commandHandler = new CommandHandler(irc, name, globalCommand, permissionManager, database);
             irc.RegisterMessageCallback(this.MessageReceived, Name);
         }
 
@@ -34,6 +35,7 @@ namespace TwitchBot
         /// <param name="message"></param>
         public void MessageReceived(ChatMessage message)
         {
+            Console.WriteLine(message.Message);
             commandHandler.ProcessCommand(message.Message, message.Sender, message.Channel);
         }
     }
