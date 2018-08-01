@@ -13,14 +13,14 @@ Variable parameters are written here with lesser than '<' and greater than '> ch
 Type variable without the <> characters e.g. !command add brackets
 * !command
    * !command list
-    * Displays all available commands
-    * Example: !command list
+      * Displays all available commands
+      * Example: !command list
    * !command add <command_name> <response>
-    * Adds a new command with static response
-    * Example: !command add brackets example.com    --- This creates command !brackets with response "example.com"
+      * Adds a new command with static response
+      * Example: !command add brackets example.com    --- This creates command !brackets with response "example.com"
    * !command remove <command_name>
-    * Removes a command created with !command add
-    * Example: !command remove brackets   --- This removes command !brackets
+      * Removes a command created with !command add
+      * Example: !command remove brackets   --- This removes command !brackets
 * !permission
     * Permission command is used to configure permission levels for the bots built-in permissions system
     * !permission set <user> <0-3>
@@ -30,8 +30,8 @@ Type variable without the <> characters e.g. !command add brackets
         * 2 Means "moderator" this is automatically given to twitch chat moderators and gives permission to configure bots commands
         * 3 Means "super moderator" same permissions as moderator but can also change normal moderators permission level
         * 4 Is the permission level of the channel owner. This permission level cannot be given to others
-    * Example: !permission set nagrodusbot 1 --- This sets the user nagrodusbot to permission level 1
+      * Example: !permission set nagrodusbot 1 --- This sets the user nagrodusbot to permission level 1
    * !permission query <name>
-    * This displays the permission level of the given user
-    * Example: !permission query nagrodusbot --- This displays the permission level of nagrodusbot
+      * This displays the permission level of the given user
+      * Example: !permission query nagrodusbot --- This displays the permission level of nagrodusbot
  
