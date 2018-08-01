@@ -21,4 +21,17 @@ Type variable without the <> characters e.g. !command add brackets
   * !command remove <command_name>
     * Removes a command created with !command add
     * Example: !command remove brackets   --- This removes command !brackets
-    
+ * !permission
+  * Permission command is used to configure permission levels for the bots built-in permissions system
+  * !permission set <user> <0-3>
+   * This sets users permission level to given number between [0-3]. Command issuer must have higher permission than the user whose permission he is about to change. Also the max permission he can give is his own permission level -1
+    * 0 Means no permissions which is the default for viewers
+    * 1 Means "Trusted". This doesn't give permission to configure the bot but persons messages e.g. links won't be monitored or removed
+    * 2 Means "moderator" this is automatically given to twitch chat moderators and gives permission to configure bots commands
+    * 3 Means "super moderator" same permissions as moderator but can also change normal moderators permission level
+    * 4 Is the permission level of the channel owner. This permission level cannot be given to others
+    * Example: !permission set nagrodusbot 1 --- This sets the user nagrodusbot to permission level 1
+   * !permission query <name>
+    * This displays the permission level of the given user
+    * Example: !permission query nagrodusbot --- This displays the permission level of nagrodusbot
+ 
