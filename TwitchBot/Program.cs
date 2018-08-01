@@ -14,11 +14,6 @@ namespace TwitchBot
         static void Main(string[] args)
         {
             Database database = new Database();
-            /*database.QueryPermissions();
-            if (database.AddPermission(new Commands.Permissions.ChannelUsernamePair("#nagrodus", "nagrodus", false), 10))
-                Console.WriteLine("done");
-            Console.Read();
-            */
             using (var bot = new ChatBot(Configuration.LoadFromJson("config.json"), database))
             {
                 bot.WaitForExit();
