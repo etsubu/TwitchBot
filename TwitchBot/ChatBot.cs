@@ -5,14 +5,22 @@ using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot
 {
+    /// <summary>
+    /// ChatBot handles login and behaviour for one account that can be active on multiple channels
+    /// </summary>
     internal class ChatBot : IDisposable
     {
         private readonly IRC irc;
         private List<Channel> Channels;
-        private GlobalCommand globalCommand;
-        private PermissionManager permissionManager;
+        private readonly GlobalCommand globalCommand;
+        private readonly PermissionManager permissionManager;
         private Database database;
 
+        /// <summary>
+        /// Initializes ChatBot
+        /// </summary>
+        /// <param name="configuration">Configuration for the login</param>
+        /// <param name="database">Database instance for synchronizing data with</param>
         public ChatBot(Configuration configuration, Database database)
         {
             this.database = database;
@@ -37,9 +45,7 @@ namespace TwitchBot
                 ChannelName channel = new ChannelName(channelName);
                 irc.JoinChannel(channel);
                 Channels.Add(new Channel(irc, channel, globalCommand, permissionManager, database));
-                Console.Write("joining " + channelName);
             }
-            Console.WriteLine("dsadas");
         }
 
         /// <summary>

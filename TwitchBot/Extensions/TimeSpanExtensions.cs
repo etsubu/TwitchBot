@@ -6,12 +6,11 @@ namespace TwitchBot.Extensions
 {
     internal static class TimeSpanExtensions
     {
-        // TODO: not tested
-        public static string ToFriendlyString(this TimeSpan timeSpan)
+        public static string ToFriendlyString(long secondsTotal)
         {
-            var hours = timeSpan.Seconds / 3600;
-            var minutes = (timeSpan.Seconds % 3600) / 60;
-            var seconds = ((timeSpan.Seconds % 3600) % 60) / 60;
+            var hours = secondsTotal / 3600;
+            var minutes = (secondsTotal % 3600) / 60;
+            var seconds = ((secondsTotal % 3600) % 60);
             var stringBuilder = new StringBuilder();
 
             if (hours > 0)

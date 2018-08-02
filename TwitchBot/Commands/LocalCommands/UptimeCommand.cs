@@ -41,7 +41,7 @@ namespace TwitchBot.Commands
         {
             if(line.Equals("uptime"))
             {
-                return new CommandResult(true, (DateTimeOffset.UtcNow - startTime).ToFriendlyString());
+                return new CommandResult(true, TimeSpanExtensions.ToFriendlyString(DateTimeOffset.UtcNow.ToUnixTimeSeconds() - startTime.ToUnixTimeSeconds()));
             }
             else if(line.Equals("uptime reset"))
             {
