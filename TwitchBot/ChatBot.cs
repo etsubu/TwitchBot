@@ -29,11 +29,15 @@ namespace TwitchBot
             this.configuration = configuration;
             ChannelName ownChannelName = new ChannelName(configuration.Username);
             irc = new IRC();
-            irc.ConnectServer(
+            while(!irc.ConnectServer(
                 configuration.Connection.Host,
                 configuration.Connection.Port,
                 configuration.Username,
-                configuration.OAuthToken);
+                configuration.OAuthToken))
+            {
+                Console.WriteLine("Sleeping 2 seconds and reconnecting...");
+                Thread.Sleep(2000);
+            }
             Channels = new List<Channel>();
             permissionManager = new PermissionManager(database, configuration.Owner);
             globalCommand = new GlobalCommand(this);

@@ -94,17 +94,28 @@ namespace TwitchBot
             if (client != null && client.Connected)
                 return false;
 
-            client = new TcpClient(host, port);
-            reader = new StreamReader(client.GetStream());
-            writer = new StreamWriter(client.GetStream());
+            try
+            {
+                client = new TcpClient(host, port);
+                reader = new StreamReader(client.GetStream());
+                writer = new StreamWriter(client.GetStream());
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
             SendMessage("PASS " + password);
             SendMessage("USER " + user + " 0 * :...");
             SendMessage("NICK " + user);
 
-
+            this.host = host;
+            this.port = port;
+            this.user = user;
+            this.password = password;
             listenerThread = new Thread(MessageReader);
             listenerThread.Start();
+
 
             return true;
         }
