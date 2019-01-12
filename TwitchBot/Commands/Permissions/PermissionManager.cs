@@ -13,19 +13,22 @@ namespace TwitchBot.Commands.Permissions
     internal class PermissionManager
     {
         private readonly Dictionary<ChannelUsernamePair, int> permissions;
-        public const int MaxPermission = 9;
+        public const int MaxPermission = 3;
         private Database database;
+        private string owner;
 
         /// <summary>
         /// Initializes PermissionManager
         /// <param name="database">Database object to use for synchronizing and querying permission levels</param>
-        /// <param name="owner">Owner of this bot will have global permission of level 10</param>
+        /// <param name="owner">Owner of this bot will have global permission of level MaxPermission</param>
         /// </summary>
         public PermissionManager(Database database, string owner)
         {
+            this.owner = owner;
             this.database = database;
             permissions = database.QueryPermissions();
-            permissions.Add(new ChannelUsernamePair(new ChannelName(), owner, true), MaxPermission + 1);
+            // Set bot owners global permission to MaxPermission
+            permissions.Add(new ChannelUsernamePair(new ChannelName(), owner, true), MaxPermission);
         }
 
         /// <summary>
@@ -36,8 +39,8 @@ namespace TwitchBot.Commands.Permissions
         /// <returns></returns>
         public int QueryPermission(ChannelName channel, string username)
         {
-            // If the user is channel owner. Return MaxPermission
-            if (channel.Equals(new ChannelName(username)))
+            // If the user is channel owner OR bot owner. Return MaxPermission
+            if (channel.Equals(new ChannelName(username)) || username.Equals(owner))
                 return MaxPermission;
             var pair = new ChannelUsernamePair(channel, username, false);
             lock (permissions)
