@@ -17,6 +17,12 @@ namespace TwitchBot
         private StreamWriter writer;
         private Thread listenerThread;
         private Dictionary<ChannelName, List<Action<ChatMessage>>> callbacks;
+        // These are updated everytime ConnectServer is called
+        // We save these so we can reconnect if connection is dropped
+        private string host;
+        private int port;
+        private string user;
+        private string password;
 
         /// <summary>
         /// Initialises a new IRC instance
@@ -152,6 +158,45 @@ namespace TwitchBot
             }
         }
 
+        private bool Reconnect()
+        {
+            if (client != null)
+                client.Close();
+            Console.WriteLine("Connection dropped. Attempting to reconnect...");
+            while (true)
+            {
+                try
+                {
+                    client = new TcpClient(host, port);
+                    reader = new StreamReader(client.GetStream());
+                    writer = new StreamWriter(client.GetStream());
+                    break;
+                }
+                catch (SocketException)
+                {
+                    // Sleep for 2 seconds before attempting to reconnect
+                    Thread.Sleep(2000);
+                }
+                catch(ArgumentException){
+                    // Shouldn't happen
+                    return false;
+                }
+            }
+            // We have now reconnected
+
+            SendMessage("PASS " + password);
+            SendMessage("USER " + user + " 0 * :...");
+            SendMessage("NICK " + user);
+
+            // Rejoin channels
+            foreach(ChannelName name in callbacks.Keys)
+            {
+                JoinChannel(name);
+            }
+            Console.WriteLine("Reconnected.");
+            return true;
+    }
+
         /// <summary>
         /// Reads all the incoming IRC messages
         /// </summary>
@@ -162,7 +207,16 @@ namespace TwitchBot
                 string line;
                 lock (reader)
                 {
-                    line = reader.ReadLine();
+                    try
+                    {
+                        line = reader.ReadLine();
+                    } catch(IOException)
+                    {
+                        // Connection lost. Invoke reconnection
+                        if (Reconnect())
+                            continue;
+                        return;
+                    }
                 }
                 Console.WriteLine(line);
                 IRCMessage message = ParseMessage(line);

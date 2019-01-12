@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using TwitchBot.Commands;
 using TwitchBot.Commands.Permissions;
 
@@ -15,6 +16,7 @@ namespace TwitchBot
         private readonly GlobalCommand globalCommand;
         private readonly PermissionManager permissionManager;
         private Database database;
+        private Configuration configuration;
 
         /// <summary>
         /// Initializes ChatBot
@@ -24,6 +26,7 @@ namespace TwitchBot
         public ChatBot(Configuration configuration, Database database)
         {
             this.database = database;
+            this.configuration = configuration;
             ChannelName ownChannelName = new ChannelName(configuration.Username);
             irc = new IRC();
             irc.ConnectServer(
