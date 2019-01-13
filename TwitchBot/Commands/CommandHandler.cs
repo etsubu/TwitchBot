@@ -95,11 +95,7 @@ namespace TwitchBot.Commands
             lock (commands)
             {
                 //Parse command name
-                string name;
-                if (index == -1)
-                    name = line;
-                else
-                    name = line.Substring(0, index);
+                string name = (index == -1) ? line : line.Substring(0, index);
 
                 if (!commands.ContainsKey(name))
                 {
