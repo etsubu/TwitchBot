@@ -25,15 +25,17 @@ namespace TwitchBot
         /// <param name="database">Database instance for synchronizing data with</param>
         public ChatBot(Configuration configuration, Database database)
         {
+            Console.WriteLine(configuration.Users.Count);
             this.database = database;
             this.configuration = configuration;
-            ChannelName ownChannelName = new ChannelName(configuration.Username);
+
+            ChannelName ownChannelName = new ChannelName(configuration.Users[0].Username);
             irc = new IRC();
             while(!irc.ConnectServer(
                 configuration.Connection.Host,
                 configuration.Connection.Port,
-                configuration.Username,
-                configuration.OAuthToken))
+                configuration.Users[0].Username,
+                configuration.Users[0].Oauth))
             {
                 Console.WriteLine("Sleeping 2 seconds and reconnecting...");
                 Thread.Sleep(2000);

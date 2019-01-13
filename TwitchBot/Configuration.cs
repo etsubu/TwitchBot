@@ -11,11 +11,18 @@
     }
  */
 
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
 namespace TwitchBot
 {
+    internal struct User
+    {
+        public string Username { get; set; }
+        public string Oauth { get; set; }
+    }
+
     internal struct Connection
     {
         public string Host;
@@ -32,16 +39,13 @@ namespace TwitchBot
     {
         public static Configuration LoadFromJson(string path) => JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(path));
 
-        public string Username { get; }
-        [JsonProperty("oauth")]
-        public string OAuthToken { get; }
+        public List<User> Users { get; }
         public string Owner { get; }
         public Connection Connection { get; }
 
-        public Configuration(string username, string oauthToken, string owner, Connection connection)
+        public Configuration(List<User> users, string owner, Connection connection)
         {
-            Username = username.ToLower();
-            OAuthToken = oauthToken;
+            this.Users = users;
             Owner = owner.ToLower();
             Connection = connection;
         }
