@@ -8,6 +8,8 @@ namespace TwitchBot
 {
     /// <summary>
     /// Database object holds a connection open to a SQL database for synchronizing the permissions, commands, broadcasts, etc
+    /// Note that we assume that no 2 instances of the bot with different name are on the same channel
+    /// Some queries use only the channel name and not the botname
     /// </summary>
     internal class Database
     {
@@ -28,10 +30,10 @@ namespace TwitchBot
         /// </summary>
         private void InitDatabase()
         {
-            string basic = "CREATE TABLE basiccommands (channel VARCHAR(26), name VARHCHAR(32), response VARHCHAR(256) )";
-            string broadcast = "CREATE TABLE broadcasts (channel VARHCHAR(26), delay INT, id INT, message VARHCHAR(512) )";
-            string permissions = "CREATE TABLE permissions (channel VARHCHAR(26), permission INT, name VARHCHAR(26) )";
-            string channels = "CREATE TABLE channels (name VARHCHAR(26) )";
+            string basic = "CREATE TABLE basiccommands (channel VARCHAR(26), name VARHCHAR(32), response VARHCHAR(256), botname VARCHAR(32) )";
+            string broadcast = "CREATE TABLE broadcasts (channel VARHCHAR(26), delay INT, id INT, message VARHCHAR(512), botname VARCHAR(32) )";
+            string permissions = "CREATE TABLE permissions (channel VARHCHAR(26), permission INT, name VARHCHAR(26), botname VARCHAR(32) )";
+            string channels = "CREATE TABLE channels (name VARHCHAR(26), botname VARCHAR(32) )";
 
             try
             {
@@ -48,11 +50,13 @@ namespace TwitchBot
         /// <summary>
         /// Retrieves complete list of channels this bot is active on
         /// </summary>
+        /// <param name="botname">Bot name to query joined channels for</param>
         /// <returns>List of channel names</returns>
-        public List<string> QueryChannels()
+        public List<string> QueryChannels(string botname)
         {
             List<string> channels = new List<string>();
-            var query = new SqliteCommand("SELECT * FROM channels", dbConnection);
+            var query = new SqliteCommand("SELECT * FROM channels WHERE @Name = botname", dbConnection);
+            query.Parameters.AddWithValue("Name", botname);
             SqliteDataReader reader = query.ExecuteReader();
             while (reader.Read())
             {
@@ -66,13 +70,14 @@ namespace TwitchBot
         /// </summary>
         /// <param name="name">Channel name</param>
         /// <returns>True if channel was added, false if failed</returns>
-        public bool AddChannel(ChannelName name)
+        public bool AddChannel(ChannelName name, string botname)
         {
             try
             {
-                string command = "INSERT into channels (name) values (@Name)";
+                string command = "INSERT into channels (name, botname) values (@Name, @botname)";
                 var sqlCommand = new SqliteCommand(command, dbConnection);
                 sqlCommand.Parameters.AddWithValue("Name", name.ToString());
+                sqlCommand.Parameters.AddWithValue("botname", botname);
                 return sqlCommand.ExecuteNonQuery() > 0;
             }
             catch (SqliteException)
@@ -84,8 +89,8 @@ namespace TwitchBot
         /// <summary>
         /// Deletes all entries in the database for the given channel name
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
+        /// <param name="name">Channel to remove all entries for</param>
+        /// <returns>True if ssuccessfull, false if failed</returns>
         public bool RemoveChannel(ChannelName name)
         {
             string deleteChannel = "DELETE FROM channels WHERE name = @Name";
@@ -102,6 +107,37 @@ namespace TwitchBot
             sqlDeletePermission.Parameters.AddWithValue("Channel", name.ToString());
             sqlDeleteCommand.Parameters.AddWithValue("Channel", name.ToString());
             sqlDeleteBroadcast.Parameters.AddWithValue("Channel", name.ToString());
+
+            bool deletedEntries = false;
+            deletedEntries |= sqlDeleteChannel.ExecuteNonQuery() > 0;
+            deletedEntries |= sqlDeletePermission.ExecuteNonQuery() > 0;
+            deletedEntries |= sqlDeleteCommand.ExecuteNonQuery() > 0;
+            deletedEntries |= sqlDeleteBroadcast.ExecuteNonQuery() > 0;
+
+            return deletedEntries;
+        }
+
+        /// <summary>
+        /// Removes all entries in the database for the given bot name
+        /// </summary>
+        /// <param name="botname">Bot name to remove entries for</param>
+        /// <returns>True if ssuccessfull, false if failed</returns>
+        public bool RemoveBot(string botname)
+        {
+            string deleteChannel = "DELETE FROM channels WHERE botname = @botname";
+            string deletePermission = "DELETE FROM permissions WHERE botname = @botname";
+            string deleteCommand = "DELETE FROM basiccommands WHERE botname = @botname";
+            string deleteBroadcast = "DELETE FROM broadcasts WHERE botname = @botname";
+
+            var sqlDeleteChannel = new SqliteCommand(deleteChannel, dbConnection);
+            var sqlDeletePermission = new SqliteCommand(deletePermission, dbConnection);
+            var sqlDeleteCommand = new SqliteCommand(deleteCommand, dbConnection);
+            var sqlDeleteBroadcast = new SqliteCommand(deleteBroadcast, dbConnection);
+
+            sqlDeleteChannel.Parameters.AddWithValue("botname", botname);
+            sqlDeletePermission.Parameters.AddWithValue("botname", botname);
+            sqlDeleteCommand.Parameters.AddWithValue("botname", botname);
+            sqlDeleteBroadcast.Parameters.AddWithValue("botname", botname);
 
             bool deletedEntries = false;
             deletedEntries |= sqlDeleteChannel.ExecuteNonQuery() > 0;

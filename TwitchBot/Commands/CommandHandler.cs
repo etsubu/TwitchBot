@@ -58,7 +58,7 @@ namespace TwitchBot.Commands
                 Console.WriteLine(command.Name);
                 commands.Add(command.Name, command);
             }
-            // Add global command
+
             commands.Add(globalCommand.Name, globalCommand);
         }
 
@@ -115,7 +115,14 @@ namespace TwitchBot.Commands
                     return false;
                 }
                 //Execute the command and send the response
-                irc.SendMessage(commands[name].Process(line, sender).Response, channel);
+                if (commands[name].IsGlobal)
+                {
+                    irc.SendMessage(((GlobalCommand)commands[name]).Process(line, sender, irc).Response, channel);
+                }
+                else
+                {
+                    irc.SendMessage(commands[name].Process(line, sender).Response, channel);
+                }
             }
 
             return true;

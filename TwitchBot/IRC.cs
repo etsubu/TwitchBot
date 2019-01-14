@@ -21,7 +21,7 @@ namespace TwitchBot
         // We save these so we can reconnect if connection is dropped
         private string host;
         private int port;
-        private string user;
+        public string user;
         private string password;
 
         /// <summary>

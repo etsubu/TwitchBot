@@ -27,7 +27,7 @@ namespace TwitchBot.Commands.LocalCommands
         /// <returns>Help text of this command</returns>
         public override string Help()
         {
-            return "Usage is !author to display the authors of this program and the link to version control";
+            return "Usage is !author to display the authors of this program and the link to version control with documentation";
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace TwitchBot.Commands.LocalCommands
         /// <returns>Authors of the program and link to version control</returns>
         public override CommandResult Process(string line, string sender)
         {
-            return new CommandResult(true, "Authors: nagrodus/etsubu and Spans. https://github.com/etsubu/TwitchBot FrankerZ");
+            return new CommandResult(true, "Authors: nagrodus/etsubu and Spans. https://github.com/etsubu/TwitchBot FrankerZ You can view documentation there as well");
         }
     }
 }

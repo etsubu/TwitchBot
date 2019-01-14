@@ -14,6 +14,7 @@ namespace TwitchBot
         public readonly ChannelName Name;
         private CommandHandler commandHandler;
         private Action<ChatMessage> chatListener;
+        public readonly IRC Irc;
 
         /// <summary>
         /// Initializes Channel
@@ -23,6 +24,7 @@ namespace TwitchBot
         /// <param name="database">Database object to synchronize channel settings with</param>
         public Channel(IRC irc, ChannelName name, GlobalCommand globalCommand, PermissionManager permissionManager, Database database)
         {
+            Irc = irc;
             Name = name;
             chatListener = MessageReceived;
             commandHandler = new CommandHandler(irc, name, globalCommand, permissionManager, database);

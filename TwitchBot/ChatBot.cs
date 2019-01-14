@@ -7,16 +7,16 @@ using TwitchBot.Commands.Permissions;
 namespace TwitchBot
 {
     /// <summary>
-    /// ChatBot handles login and behaviour for one account that can be active on multiple channels
+    /// ChatBot handles login and behaviour for multiple accounts that can be active on multiple channels
     /// </summary>
     internal class ChatBot : IDisposable
     {
-        private readonly IRC irc;
+        private List<IRC> botInstances;
         private List<Channel> Channels;
         private readonly GlobalCommand globalCommand;
         private readonly PermissionManager permissionManager;
         private Database database;
-        private Configuration configuration;
+        private readonly Configuration configuration;
 
         /// <summary>
         /// Initializes ChatBot
@@ -29,31 +29,37 @@ namespace TwitchBot
             this.database = database;
             this.configuration = configuration;
 
-            ChannelName ownChannelName = new ChannelName(configuration.Users[0].Username);
-            irc = new IRC();
-            while(!irc.ConnectServer(
-                configuration.Connection.Host,
-                configuration.Connection.Port,
-                configuration.Users[0].Username,
-                configuration.Users[0].Oauth))
-            {
-                Console.WriteLine("Sleeping 2 seconds and reconnecting...");
-                Thread.Sleep(2000);
-            }
             Channels = new List<Channel>();
+            botInstances = new List<IRC>();
             permissionManager = new PermissionManager(database, configuration.Owner);
             globalCommand = new GlobalCommand(this);
 
-            irc.JoinChannel(ownChannelName);
-            Channel ownChannel = new Channel(irc, ownChannelName, globalCommand, permissionManager, database);
-            Channels.Add(ownChannel);
-
-            List<string> channelNames = database.QueryChannels();
-            foreach (string channelName in channelNames)
+            foreach (User user in configuration.Users)
             {
-                ChannelName channel = new ChannelName(channelName);
-                irc.JoinChannel(channel);
-                Channels.Add(new Channel(irc, channel, globalCommand, permissionManager, database));
+                IRC irc = new IRC();
+                while (!irc.ConnectServer(
+                    configuration.Connection.Host,
+                    configuration.Connection.Port,
+                    user.Username,
+                    user.Oauth))
+                {
+                    Console.WriteLine("Sleeping 2 seconds and reconnecting...");
+                    Thread.Sleep(2000);
+                }
+                // Connected. Join the channels associated with this bot name
+                // Join own channel
+                ChannelName ownChannelName = new ChannelName(user.Username);
+                irc.JoinChannel(ownChannelName);
+                Channel ownChannel = new Channel(irc, ownChannelName, globalCommand, permissionManager, database);
+                Channels.Add(ownChannel);
+                // Join rest of the channels
+                List<string> channelNames = database.QueryChannels(user.Username);
+                foreach (string channelName in channelNames)
+                {
+                    ChannelName channel = new ChannelName(channelName);
+                    irc.JoinChannel(channel);
+                    Channels.Add(new Channel(irc, channel, globalCommand, permissionManager, database));
+                }
             }
         }
 
@@ -67,7 +73,7 @@ namespace TwitchBot
             {
                 foreach (Channel channel in Channels)
                 {
-                    irc.SendMessage("[GLOBAL]: " + message, channel.Name);
+                    channel.Irc.SendMessage("[GLOBAL]: " + message, channel.Name);
                 }
             }
         }
@@ -76,7 +82,7 @@ namespace TwitchBot
         /// Joins a new channel
         /// </summary>
         /// <param name="username">User whose channel to join</param>
-        public void JoinToChannel(string username)
+        public bool JoinToChannel(string username, IRC irc)
         {
             lock(this.Channels)
             {
@@ -84,13 +90,19 @@ namespace TwitchBot
                 foreach (Channel channel in Channels)
                 {
                     if (channel.Name.Equals(channelName))
-                        return;
+                        return false;
                 }
-                if (database.AddChannel(channelName))
+                if (database.AddChannel(channelName, irc.user))
                 {
                     irc.JoinChannel(channelName);
                     Channels.Add(new Channel(irc, channelName, globalCommand, permissionManager, database));
                     irc.SendMessage("Joined channel KappaClaus", channelName);
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Failed to add channel to database");
+                    return false;
                 }
             }
         }
@@ -108,9 +120,9 @@ namespace TwitchBot
                 {
                     if (channel.Equals(Channels[i].Name))
                     {
-                        irc.SendMessage("Leaving channel... bye bye BibleThump");
+                        Channels[i].Irc.SendMessage("Leaving channel... bye bye BibleThump");
+                        Channels[i].Irc.LeaveChannel(channel);
                         Channels.RemoveAt(i);
-                        irc.LeaveChannel(channel);
                         return database.RemoveChannel(channel);
                     }
                 }
@@ -130,11 +142,11 @@ namespace TwitchBot
         /// <summary>
         /// Synchronously waits for the IRC client to exit
         /// </summary>
-        public void WaitForExit() => irc.WaitForExit();
+        public void WaitForExit() => botInstances.ForEach(x => x.WaitForExit());
 
         public void Dispose()
         {
-            irc?.Dispose();
+            botInstances.ForEach(x => x?.Dispose());
         }
     }
 }
