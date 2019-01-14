@@ -29,8 +29,8 @@ namespace TwitchBot
             Irc = irc;
             Name = name;
             chatListener = MessageReceived;
-            commandHandler = new CommandHandler(irc, name, globalCommand, permissionManager, database);
             this.filters = new MessageFilterHandler(permissionManager, irc);
+            commandHandler = new CommandHandler(irc, filters, name, globalCommand, permissionManager, database);
             irc.RegisterMessageCallback(this.MessageReceived, Name);
         }
 

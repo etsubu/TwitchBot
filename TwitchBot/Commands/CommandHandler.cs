@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using TwitchBot.Commands.LocalCommands;
+using TwitchBot.Commands.MessageFilters;
 using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot.Commands
@@ -24,7 +25,7 @@ namespace TwitchBot.Commands
         /// <param name="irc">IRC object to use for sending messages</param>
         /// <param name="channelOwner">Name of the channel owner</param>
         /// <param name="permissionManager">PermissionManager object that contains all permission levels</param>
-        public CommandHandler(IRC irc, ChannelName channelName, GlobalCommand globalCommand, PermissionManager permissionManager, Database database)
+        public CommandHandler(IRC irc, MessageFilterHandler filter, ChannelName channelName, GlobalCommand globalCommand, PermissionManager permissionManager, Database database)
         {
             this.irc = irc;
             this.channelName = channelName;
@@ -42,9 +43,12 @@ namespace TwitchBot.Commands
                 .AddSingleton<Command, BroadcastCommand>()
                 .AddSingleton<Command, AuthorCommand>()
                 .AddSingleton<Command, HelpCommand>()
+                .AddSingleton<Command, PermitCommand>()
                 .AddSingleton(this)
                 .AddSingleton(permissionManager)
+                .AddSingleton(filter)
                 .AddSingleton(channelName);
+                
 
             var provider = services.BuildServiceProvider();
 
