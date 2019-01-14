@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot.Commands.MessageFilters
@@ -16,8 +17,8 @@ namespace TwitchBot.Commands.MessageFilters
         private readonly IRC irc;
         private readonly PermissionManager permissions;
         private LinkedList<string> bannedWords;
-        private readonly double CapsPercentFilter = 95;
-        private readonly double UnicodePercentFilter = 95;
+        private readonly double CapsPercentFilter = 0.80;
+        private readonly double UnicodePercentFilter = 0.30;
 
         public MessageFilterHandler(PermissionManager permissions, IRC irc)
         {
@@ -66,27 +67,36 @@ namespace TwitchBot.Commands.MessageFilters
         public static bool IsLink(string msg)
         {
             msg = msg.ToLower().Trim();
-            return msg.StartsWith("http://") || msg.StartsWith("https://") || msg.StartsWith("ftp://") || msg.StartsWith("www.");
+            string[] parts = msg.Split(" ");
+            foreach(string str in parts)
+            {
+                if (msg.StartsWith("http://") || msg.StartsWith("https://") || msg.StartsWith("ftp://") || msg.StartsWith("www."))
+                    return true;
+                return Regex.IsMatch(str, "\\w+\\.\\w+");
+            }
+            return false;
         }
 
         public bool ProcessFilters(ChatMessage message)
         {
             if(!LinksAllowed && permissions.QueryPermission(message.Channel, message.Sender) < 1 && IsLink(message.Message))
             {
-                irc.SendMessage("/timeout " + message.Sender + " 1");
+                irc.SendMessage($"/timeout {message.Sender} 1", message.Channel);
                 irc.SendMessage($"{message.Sender} Links are not allowed!", message.Channel);
                 return true;
             }
             if(message.Message.Length > 10)
             {
-                if(CapsPercent(message.Message) > CapsPercentFilter)
+                Console.WriteLine(UnicodePercent(message.Message));
+                if(CapsPercent(message.Message) > CapsPercentFilter && permissions.QueryPermission(message.Channel, message.Sender) < 1)
                 {
-                    irc.SendMessage("/timeout " + message.Sender + " 1");
+                    irc.SendMessage($"/timeout {message.Sender} 1", message.Channel);
                     irc.SendMessage($"{message.Sender} Calm down mate. Let's not spam caps!", message.Channel);
                     return true;
                 }
-                else if(UnicodePercent(message.Message) > UnicodePercentFilter)
+                else if(UnicodePercent(message.Message) > UnicodePercentFilter && permissions.QueryPermission(message.Channel, message.Sender) < 1)
                 {
+                    irc.SendMessage($"/timeout {message.Sender} 1", message.Channel);
                     irc.SendMessage($"{message.Sender} hmm it seems like someone is posting pastaThat in the chat", message.Channel);
                     return true;
                 }

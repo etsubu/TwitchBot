@@ -50,6 +50,7 @@ namespace TwitchBot
                 // Join own channel
                 ChannelName ownChannelName = new ChannelName(user.Username);
                 irc.JoinChannel(ownChannelName);
+                
                 Channel ownChannel = new Channel(irc, ownChannelName, globalCommand, permissionManager, database);
                 Channels.Add(ownChannel);
                 // Join rest of the channels

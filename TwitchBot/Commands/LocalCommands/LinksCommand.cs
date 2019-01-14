@@ -8,7 +8,6 @@ namespace TwitchBot.Commands.LocalCommands
     internal class LinksCommand : Command
     {
         public override bool IsRemoveable => false;
-
         public override bool IsGlobal => false;
 
         private MessageFilterHandler filter;

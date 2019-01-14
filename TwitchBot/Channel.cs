@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using TwitchBot.Commands;
+using TwitchBot.Commands.MessageFilters;
 using TwitchBot.Commands.Permissions;
 
 namespace TwitchBot
@@ -13,6 +14,7 @@ namespace TwitchBot
     {
         public readonly ChannelName Name;
         private CommandHandler commandHandler;
+        private MessageFilterHandler filters;
         private Action<ChatMessage> chatListener;
         public readonly IRC Irc;
 
@@ -28,6 +30,7 @@ namespace TwitchBot
             Name = name;
             chatListener = MessageReceived;
             commandHandler = new CommandHandler(irc, name, globalCommand, permissionManager, database);
+            this.filters = new MessageFilterHandler(permissionManager, irc);
             irc.RegisterMessageCallback(this.MessageReceived, Name);
         }
 
@@ -38,7 +41,12 @@ namespace TwitchBot
         public void MessageReceived(ChatMessage message)
         {
             Console.WriteLine(message.Message);
-            commandHandler.ProcessCommand(message.Message, message.Sender, message.Channel);
+            if(!commandHandler.ProcessCommand(message.Message, message.Sender, message.Channel))
+            {
+                // Only invoke filters if given message was not command
+                Console.WriteLine("Invoke filters");
+                filters.ProcessFilters(message);
+            }
         }
     }
 }

@@ -164,6 +164,7 @@ namespace TwitchBot
         {
             lock (writer)
             {
+                Console.WriteLine($"PRIVMSG {channel} :{message}\r\n");
                 writer.Write($"PRIVMSG {channel} :{message}\r\n");
                 writer.Flush();
             }
@@ -250,7 +251,6 @@ namespace TwitchBot
                         if (callbacks.ContainsKey(chatMessage.Channel)) {
                             foreach (Action<ChatMessage> callback in callbacks[chatMessage.Channel])
                             {
-                                Console.WriteLine("callback invoke");
                                 callback.Invoke(chatMessage);
                             }
                         }

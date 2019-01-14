@@ -50,8 +50,10 @@ namespace TwitchBot.Commands
             }
             else if (parts.Length == 3 && parts[1].Equals("join"))
             {
-                Bot.JoinToChannel(parts[2], irc);
-                return new CommandResult(true, "Joined to channel " + parts[2]);
+                if (Bot.JoinToChannel(parts[2], irc))
+                    return new CommandResult(true, "Joined to channel " + parts[2]);
+                else
+                    return new CommandResult(false, "Failed to join channel " + parts[2] + " Maybe one instance is already on the channel?");
             }
             return new CommandResult(false, "Invalid command");
         }
