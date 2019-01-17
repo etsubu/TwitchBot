@@ -38,6 +38,11 @@ namespace TwitchBot.Commands.MessageFilters
             CapsAllowed = false;
         }
 
+        /// <summary>
+        /// Adds temporary permit for a user to post a link within 1 minute
+        /// </summary>
+        /// <param name="user">User to give permission</param>
+        /// <returns>CommandResults containing information whether the user was given permission</returns>
         public CommandResult AddPermit(string user)
         {
             user = user.ToLower();
@@ -137,6 +142,11 @@ namespace TwitchBot.Commands.MessageFilters
             return ((double)caps) / (message.Length);
         }
 
+        /// <summary>
+        /// Checks whether given string is a link
+        /// </summary>
+        /// <param name="msg">String to analyze</param>
+        /// <returns>True if the string is link, false if not</returns>
         public static bool IsLink(string msg)
         {
             msg = msg.ToLower().Trim();
@@ -150,6 +160,11 @@ namespace TwitchBot.Commands.MessageFilters
             return false;
         }
 
+        /// <summary>
+        /// Processes all the filters for the given message
+        /// </summary>
+        /// <param name="message">Message that was sent</param>
+        /// <returns>True if message was filtered, false if not</returns>
         public bool ProcessFilters(ChatMessage message)
         {
             if(!LinksAllowed && (permissions.QueryPermission(message.Channel, message.Sender) < 1 || !PopPermit(message.Sender)) && IsLink(message.Message))
@@ -160,13 +175,13 @@ namespace TwitchBot.Commands.MessageFilters
             }
             if(message.Message.Length > 10)
             {
-                if(CapsPercent(message.Message) > CapsPercentFilter && (permissions.QueryPermission(message.Channel, message.Sender) < 1 || !PopPermit(message.Sender)))
+                if(!CapsAllowed && CapsPercent(message.Message) > CapsPercentFilter && (permissions.QueryPermission(message.Channel, message.Sender) < 1 || !PopPermit(message.Sender)))
                 {
                     irc.SendMessage($"/timeout {message.Sender} 1", message.Channel);
                     irc.SendMessage($"{message.Sender} Calm down mate. Let's not spam caps!", message.Channel);
                     return true;
                 }
-                else if(UnicodePercent(message.Message) > UnicodePercentFilter && (permissions.QueryPermission(message.Channel, message.Sender) < 1 || !PopPermit(message.Sender)))
+                else if(!UnicodeAllowed && UnicodePercent(message.Message) > UnicodePercentFilter && (permissions.QueryPermission(message.Channel, message.Sender) < 1 || !PopPermit(message.Sender)))
                 {
                     irc.SendMessage($"/timeout {message.Sender} 1", message.Channel);
                     irc.SendMessage($"{message.Sender} hmm it seems like someone is posting pastaThat in the chat", message.Channel);
