@@ -47,6 +47,7 @@ namespace TwitchBot.Commands
                 .AddSingleton<Command, CapsCommand>()
                 .AddSingleton<Command, UnicodeCommand>()
                 .AddSingleton<Command, LinksCommand>()
+                .AddSingleton<Command, VotePollCommand>()
                 .AddSingleton(this)
                 .AddSingleton(permissionManager)
                 .AddSingleton(filter)
@@ -124,11 +125,15 @@ namespace TwitchBot.Commands
                 //Execute the command and send the response
                 if (commands[name].IsGlobal)
                 {
-                    irc.SendMessage(((GlobalCommand)commands[name]).Process(line, sender, irc).Response, channel);
+                    CommandResult result = ((GlobalCommand)commands[name]).Process(line, sender, irc);
+                    if(result.Response != null && result.Response.Length > 0)
+                        irc.SendMessage(result.Response, channel);
                 }
                 else
                 {
-                    irc.SendMessage(commands[name].Process(line, sender).Response, channel);
+                    CommandResult result = commands[name].Process(line, sender);
+                    if (result.Response != null && result.Response.Length > 0)
+                        irc.SendMessage(result.Response, channel);
                 }
             }
 
