@@ -251,6 +251,7 @@ namespace TwitchBot
                         if (callbacks.ContainsKey(chatMessage.Channel)) {
                             foreach (Action<ChatMessage> callback in callbacks[chatMessage.Channel])
                             {
+                                SendMessage(".mods", chatMessage.Channel);
                                 callback.Invoke(chatMessage);
                             }
                         }

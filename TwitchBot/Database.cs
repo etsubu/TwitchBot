@@ -159,11 +159,11 @@ namespace TwitchBot
             SqliteDataReader reader = query.ExecuteReader();
             while (reader.Read())
             {
-                if(reader["channel"] == null)
-                    permissions.Add(new ChannelUsernamePair(null, reader["name"].ToString(), true), (int) reader["permissions"]);
-                else
-                    permissions.Add(new ChannelUsernamePair(new ChannelName(reader["channel"].ToString()), reader["name"].ToString(), false), (int) reader["permission"]);
                 Console.WriteLine("Channel: " + reader["channel"] + "\nName: " + reader["name"] + "\npermission: " + reader["permission"]);
+                if (reader["channel"] == null)
+                    permissions.Add(new ChannelUsernamePair(null, reader["name"].ToString(), true), reader.GetInt32(1));
+                else
+                    permissions.Add(new ChannelUsernamePair(new ChannelName(reader["channel"].ToString()), reader["name"].ToString(), false), reader.GetInt32(1));
             }
             return permissions;
         }
