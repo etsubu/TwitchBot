@@ -19,21 +19,26 @@ namespace TwitchBot.Commands.LocalCommands
 
         public override string Help()
         {
-            return "Usage !unicode true    !unicode false     To allow or disallow unicode messages from non trusted users";
+            return "Usage !unicode true    !unicode false     To allow or disallow unicode messages from nontrusted users";
         }
 
         public override CommandResult Process(string line, string sender)
         {
             line = line.ToLower();
-            if (line.Equals("1") || line.Equals("true") || line.Equals("allow"))
+            string[] parts = line.Split(" ");
+            if (parts.Length == 1)
+            {
+                return new CommandResult(true, (filter.LinksAllowed) ? "Unicode pasta is allowed!" : "Unicode pasta is not allowed!");
+            }
+            if (parts[1].Equals("1") || parts[1].Equals("true") || parts[1].Equals("allow"))
             {
                 filter.UnicodeAllowed = true;
                 return new CommandResult(true, "unicode allowed!");
             }
-            else if (line.Equals("0") || line.Equals("false") || line.Equals("disallow"))
-            {
+            else if (parts[1].Equals("0") || parts[1].Equals("false") || parts[1].Equals("disallow"))
+            { 
                 filter.UnicodeAllowed = false;
-                return new CommandResult(true, "unicode from non trusted users have been blocked!");
+                return new CommandResult(true, "unicode from nontrusted users have been blocked!");
             }
             return new CommandResult(false, $"@{sender} Unknown boolean value \"{line}\" try true/false or 0/1");
         }

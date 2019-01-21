@@ -19,21 +19,26 @@ namespace TwitchBot.Commands.LocalCommands
 
         public override string Help()
         {
-            return "Usage !caps true    !caps false     To allow or disallow only caps messages from non trusted users";
+            return "Usage !caps true    !caps false     To allow or disallow only caps messages from nontrusted users";
         }
 
         public override CommandResult Process(string line, string sender)
         {
             line = line.ToLower();
-            if (line.Equals("1") || line.Equals("true") || line.Equals("allow"))
+            string[] parts = line.Split(" ");
+            if (parts.Length == 1)
+            {
+                return new CommandResult(true, (filter.CapsAllowed) ? "Caps spam is allowed!" : "Caps spam is not allowed!");
+            }
+            if (parts[1].Equals("1") || parts[1].Equals("true") || parts[1].Equals("allow"))
             {
                 filter.CapsAllowed = true;
                 return new CommandResult(true, "caps allowed!");
             }
-            else if (line.Equals("0") || line.Equals("false") || line.Equals("disallow"))
+            else if (parts[1].Equals("0") || parts[1].Equals("false") || parts[1].Equals("disallow"))
             {
                 filter.CapsAllowed = false;
-                return new CommandResult(true, "caps from non trusted users have been blocked!");
+                return new CommandResult(true, "caps from nontrusted users have been blocked!");
             }
             return new CommandResult(false, $"@{sender} Unknown boolean value \"{line}\" try true/false or 0/1");
         }
