@@ -1,53 +1,107 @@
-﻿/*
- * Sample JSON configuration file:
- *  {
-        "username": "",
-        "oauth": "oauth:---------------------",
-        "owner": "",
-        "connection": {
-            "host": "irc.twitch.tv",
-            "port": 6667
-        },
-    }
- */
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace TwitchBot
 {
-    internal struct User
+    /// <summary>
+    /// User account details
+    /// </summary>
+    public class User
     {
         public string Username { get; set; }
         public string Oauth { get; set; }
+
+        public User(string username, string oauth)
+        {
+            Username = username;
+            Oauth = oauth;
+        }
+
+        public User()
+        {
+
+        }
     }
 
-    internal struct Connection
+    /// <summary>
+    /// Connection details to the server
+    /// </summary>
+    public class Connection
     {
-        public string Host;
-        public int Port;
+        public string Host { get; set; }
+        public int Port { get; set; }
 
         public Connection(string host, int port)
         {
             Host = host;
             Port = port;
         }
+
+        public Connection()
+        {
+
+        }
     }
 
+    /// <summary>
+    /// Configuration of the bot containing user accounts and connection details 
+    /// </summary>
     internal class Configuration
     {
-        public static Configuration LoadFromJson(string path) => JsonConvert.DeserializeObject<Configuration>(File.ReadAllText(path));
 
-        public List<User> Users { get; }
-        public string Owner { get; }
-        public Connection Connection { get; }
+        public List<User> Users { get; set; }
+        public string Owner { get; set; }
+        public Connection Connection { get; set; }
 
+        /// <summary>
+        /// Loads configuration from file
+        /// </summary>
+        /// <param name="path">Path to config file</param>
+        /// <returns>Configuration object</returns>
+        public static Configuration InitializeConfigurationFromFile(string path)
+        {
+            string fileContent = File.ReadAllText(path);
+            var input = new StringReader(fileContent);
+
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            return deserializer.Deserialize<Configuration>(input);
+        }
+
+        /// <summary>
+        /// Serializes given configuration to yaml format as string
+        /// </summary>
+        /// <param name="c">Configuration to serialize</param>
+        /// <returns>Serialized configuration as string</returns>
+        public static string SerializeConfiguration(Configuration c)
+        {
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            return serializer.Serialize(c);
+        }
+
+        /// <summary>
+        /// Initializes Configuration object
+        /// </summary>
+        /// <param name="users">List of user accounts that will be hosting separate bost instances</param>
+        /// <param name="owner">Owner of this bot</param>
+        /// <param name="connection">Connection details to the twitch server</param>
         public Configuration(List<User> users, string owner, Connection connection)
         {
-            this.Users = users;
+            Users = users;
             Owner = owner.ToLower();
             Connection = connection;
+        }
+
+        public Configuration()
+        {
+
         }
     }
 }
