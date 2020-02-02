@@ -99,7 +99,7 @@ namespace TwitchBot.Commands.LocalCommands
             return new CommandResult(false, $"{sender} invalid vote option!");
         }
 
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string sender, string botname)
         {
             if(line.Equals("poll"))
             {
@@ -108,14 +108,14 @@ namespace TwitchBot.Commands.LocalCommands
             string[] parts = line.Split(" ");
             if (parts.Length > 1 && parts[1].Equals("results"))
             {
-                if(permissionManager.QueryPermission(channel, sender) <= 1)
+                if(permissionManager.QueryPermission(channel, sender, botname) <= 1)
                 {
                     return new CommandResult(false, $"{sender} You need minimum permission of level 2 to close votepoll!");
                 }
                 return ClosePoll();
             }
             else if(parts.Length > 2 && parts[1].Equals("new")) {
-                if (permissionManager.QueryPermission(channel, sender) <= 1)
+                if (permissionManager.QueryPermission(channel, sender, botname) <= 1)
                 {
                     return new CommandResult(false, $"{sender} You need minimum permission of level 2 to start votepoll!");
                 }

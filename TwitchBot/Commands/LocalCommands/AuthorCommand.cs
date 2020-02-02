@@ -36,7 +36,7 @@ namespace TwitchBot.Commands.LocalCommands
         /// <param name="line"></param>
         /// <param name="sender"></param>
         /// <returns>Authors of the program and link to version control</returns>
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string sender, string botname)
         {
             return new CommandResult(true, "Authors: nagrodus/etsubu and Spans. https://github.com/etsubu/TwitchBot FrankerZ You can view documentation there as well");
         }

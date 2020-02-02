@@ -21,7 +21,7 @@ namespace TwitchBot
         // We save these so we can reconnect if connection is dropped
         private string host;
         private int port;
-        public string user;
+        public string user { get; set;  }
         private string password;
 
         /// <summary>
@@ -251,7 +251,6 @@ namespace TwitchBot
                         if (callbacks.ContainsKey(chatMessage.Channel)) {
                             foreach (Action<ChatMessage> callback in callbacks[chatMessage.Channel])
                             {
-                                SendMessage(".mods", chatMessage.Channel);
                                 callback.Invoke(chatMessage);
                             }
                         }

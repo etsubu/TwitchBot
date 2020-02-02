@@ -37,7 +37,7 @@ namespace TwitchBot.Commands.LocalCommands
         /// <param name="line">Command given</param>
         /// <param name="sender">Name of the sender</param>
         /// <returns></returns>
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string sender, string botname)
         {
             string[] parts = line.Split(" ");
             if (parts.Length == 1)

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using TwitchBot.Commands;
 using TwitchBot.Commands.MessageFilters;
 using TwitchBot.Commands.Permissions;
@@ -45,7 +43,7 @@ namespace TwitchBot
             {
                 // Only invoke filters if given message was not command
                 Console.WriteLine("Invoke filters");
-                filters.ProcessFilters(message);
+                filters.ProcessFilters(message, Irc.user);
             }
         }
     }
