@@ -179,6 +179,11 @@ namespace TwitchBot
         /// <returns>True if a permission was updated, false if not</returns>
         public bool UpdatePermission(ChannelUsernamePair pair, int permission, string botname)
         {
+            if(permission == 0)
+            {
+                // 0 is default value which means we can delete the entry
+                return DeletePermission(pair, botname);
+            }
             string commandUpdateLocal  = $"UPDATE {PERMISSIONS_TABLE} SET permission = @Permission WHERE channel = @Channel AND name = @Name AND botname = @Botname";
             string commandUpdateGlobal = $"UPDATE {PERMISSIONS_TABLE} SET permission = @Permission WHERE channel IS NULL AND name = @Name";
             SqliteCommand command;
@@ -214,7 +219,12 @@ namespace TwitchBot
         /// <returns>True if permission was updated, false if not</returns>
         public bool AddPermission(ChannelUsernamePair pair, int permission, string botname)
         {
-            string command = $"INSERT into {PERMISSIONS_TABLE} (channel, permission, name, botname) values (@Channel, @Permission, @Name, @Botname)";
+            if(permission == 0)
+            {
+                // Don't add default values
+                return DeletePermission(pair, botname);
+            }
+            string command = $"INSERT into {PERMISSIONS_TABLE} (channel, permission, name, botname) values (@Channel, @Permission, @Name, @Botname)";// ON CONFLICT(channel, name, botname) DO UPDATE SET permission=@Permission";
             var sqlCommand = new SqliteCommand(command, dbConnection);
             sqlCommand.Parameters.AddWithValue("Channel", pair.Channel.ToString());
             sqlCommand.Parameters.AddWithValue("Permission", permission);
@@ -222,11 +232,14 @@ namespace TwitchBot
             sqlCommand.Parameters.AddWithValue("Botname", botname);
             try
             {
-                return sqlCommand.ExecuteNonQuery() > 0;
+                int modified = sqlCommand.ExecuteNonQuery();
+                Console.WriteLine(modified);
+                return modified > 0;
             }
-            catch (SqliteException)
+            catch (SqliteException e)
             {
-                return false;
+                throw e;
+                //return false;
             }
         }
 

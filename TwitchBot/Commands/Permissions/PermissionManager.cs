@@ -60,16 +60,13 @@ namespace TwitchBot.Commands.Permissions
         public void UpdatePermission(ChannelName channel, string username, int permission, string botname)
         {
             var pair = new ChannelUsernamePair(channel, username, false);
-            if (QueryPermission(channel, username, botname) != 0)
+            if(permission == 0)
             {
-                if (permission == 0)
-                {
-                    database.DeletePermission(pair, botname);
-                }
-                else
-                {
-                    database.UpdatePermission(pair, permission, botname);
-                }
+                database.DeletePermission(pair, botname);
+            }
+            if (database.QueryPermission(channel.ToString(), username, botname) != 0)
+            {
+                database.UpdatePermission(pair, permission, botname);
             }
             else
             {
