@@ -2,6 +2,22 @@
 This bot contains basic functionality for twitch such as custom commands with static response, broadcast messages, built-in permission system, uptime.
 Also it can be active on multiple channels at the same time and configurations are channel specific. Global moderators can make the bot to join/leave channels.
 
+## How to install
+Download the bot from releases or compile it from the source locally.\
+Initially when starting the application it will fail to find config fails and ask if you wish to create those.\
+Select "y" and follow the instructions. Note that you need oauth2 token for the bot account. If you don't know where to get one you can use this link https://twitchapps.com/tmi (However, note that this is 3rd party service which we do not host or guarantee safety).\
+Follow the initializiation process. Example configuration where "nagrodusbot" is my bot account and "nagrodus" is my actual twitch account:\
+```
+Would you like to initialize configuration now (y/n): y
+The program can support multiple bot instances with different user names. Let's define those first
+Twitch username for bot (empty will stop adding users): nagrodusbot
+Twitch oauth token for the bot (empty will stop adding users): OAUTH_TOKEN_HERE
+Twitch username for bot (empty will stop adding users):
+Input the twitch username of the person who owns the bot (will receive global admin privileges): nagrodus
+Do you wish to configure the twitch irc hostname and port. If not sure then leave empty and defaults will be used (y/n): n
+```
+Now the configuration file will be written and the bot should start properly the next time you run it.
+
 ## TODO ##
 * Vote polls
 * Permissions for posting links
