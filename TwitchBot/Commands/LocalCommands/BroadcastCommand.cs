@@ -150,7 +150,7 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line</param>
         /// <param name="sender">Name of the sender</param>
         /// <returns>Response to the command</returns>
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string sender, string botname)
         {
             string[] parts = line.Split(" ");
             if (parts.Length < 2)

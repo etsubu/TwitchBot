@@ -124,7 +124,7 @@ namespace TwitchBot
                         Channels[i].Irc.SendMessage("Leaving channel... bye bye BibleThump");
                         Channels[i].Irc.LeaveChannel(channel);
                         Channels.RemoveAt(i);
-                        return database.RemoveChannel(channel);
+                        return database.RemoveChannel(channel, Channels[i].Irc.user);
                     }
                 }
             }

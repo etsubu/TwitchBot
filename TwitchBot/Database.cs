@@ -14,6 +14,10 @@ namespace TwitchBot
     internal class Database
     {
         private SqliteConnection dbConnection;
+        private static readonly string CHANNELS_TABLE = "channels";
+        private static readonly string BASIC_COMMANDS_TABLE = "basiccommands";
+        private static readonly string PERMISSIONS_TABLE = "permissions";
+        private static readonly string BROADCASTS_TABLE = "broadcasts";
 
         /// <summary>
         /// Initializes the Database
@@ -30,10 +34,10 @@ namespace TwitchBot
         /// </summary>
         private void InitDatabase()
         {
-            string basic = "CREATE TABLE basiccommands (channel VARCHAR(26), name VARHCHAR(32), response VARHCHAR(256), botname VARCHAR(32) )";
-            string broadcast = "CREATE TABLE broadcasts (channel VARHCHAR(26), delay INT, id INT, message VARHCHAR(512), botname VARCHAR(32) )";
-            string permissions = "CREATE TABLE permissions (channel VARHCHAR(26), permission INT, name VARHCHAR(26), botname VARCHAR(32) )";
-            string channels = "CREATE TABLE channels (name VARHCHAR(26), botname VARCHAR(32) )";
+            string basic       = $"CREATE TABLE {BASIC_COMMANDS_TABLE} (channel VARCHAR(26), name VARHCHAR(32), response VARHCHAR(256), botname VARCHAR(32) )";
+            string broadcast   = $"CREATE TABLE {BROADCASTS_TABLE} (channel VARHCHAR(26), delay INT, id INT, message VARHCHAR(512), botname VARCHAR(32) )";
+            string permissions = $"CREATE TABLE {PERMISSIONS_TABLE} (channel VARHCHAR(26), permission INT, name VARHCHAR(26), botname VARCHAR(32) )";
+            string channels    = $"CREATE TABLE {CHANNELS_TABLE} (name VARHCHAR(26), botname VARCHAR(32) )";
 
             try
             {
@@ -55,8 +59,8 @@ namespace TwitchBot
         public List<string> QueryChannels(string botname)
         {
             List<string> channels = new List<string>();
-            var query = new SqliteCommand("SELECT * FROM channels WHERE @Name = botname", dbConnection);
-            query.Parameters.AddWithValue("Name", botname);
+            var query = new SqliteCommand($"SELECT * FROM {CHANNELS_TABLE} WHERE botname = @Botname", dbConnection);
+            query.Parameters.AddWithValue("Botname", botname);
             SqliteDataReader reader = query.ExecuteReader();
             while (reader.Read())
             {
@@ -74,10 +78,10 @@ namespace TwitchBot
         {
             try
             {
-                string command = "INSERT into channels (name, botname) values (@Name, @botname)";
+                string command = $"INSERT into {CHANNELS_TABLE} (name, botname) values (@Name, @Botname)";
                 var sqlCommand = new SqliteCommand(command, dbConnection);
                 sqlCommand.Parameters.AddWithValue("Name", name.ToString());
-                sqlCommand.Parameters.AddWithValue("botname", botname);
+                sqlCommand.Parameters.AddWithValue("Botname", botname);
                 return sqlCommand.ExecuteNonQuery() > 0;
             }
             catch (SqliteException)
@@ -91,22 +95,26 @@ namespace TwitchBot
         /// </summary>
         /// <param name="name">Channel to remove all entries for</param>
         /// <returns>True if ssuccessfull, false if failed</returns>
-        public bool RemoveChannel(ChannelName name)
+        public bool RemoveChannel(ChannelName name, string botname)
         {
-            string deleteChannel = "DELETE FROM channels WHERE name = @Name";
-            string deletePermission = "DELETE FROM permissions WHERE channel = @Channel";
-            string deleteCommand = "DELETE FROM basiccommands WHERE channel = @Channel";
-            string deleteBroadcast = "DELETE FROM broadcasts WHERE channel = @Channel";
+            string deleteChannel    = $"DELETE FROM {CHANNELS_TABLE} WHERE name = @Name AND botname = @Botname";
+            string deletePermission = $"DELETE FROM {PERMISSIONS_TABLE} WHERE channel = @Channe AND botname = @Botname";
+            string deleteCommand    = $"DELETE FROM {BASIC_COMMANDS_TABLE} WHERE channel = @Channel AND botname = @Botname";
+            string deleteBroadcast  = $"DELETE FROM {BROADCASTS_TABLE} WHERE channel = @Channel AND botname = @Botname";
 
             var sqlDeleteChannel = new SqliteCommand(deleteChannel, dbConnection);
             var sqlDeletePermission = new SqliteCommand(deletePermission, dbConnection);
             var sqlDeleteCommand = new SqliteCommand(deleteCommand, dbConnection);
             var sqlDeleteBroadcast = new SqliteCommand(deleteBroadcast, dbConnection);
 
+            sqlDeleteChannel.Parameters.AddWithValue("Botname", botname);
             sqlDeleteChannel.Parameters.AddWithValue("Name", name.ToString());
             sqlDeletePermission.Parameters.AddWithValue("Channel", name.ToString());
+            sqlDeletePermission.Parameters.AddWithValue("Botname", botname);
             sqlDeleteCommand.Parameters.AddWithValue("Channel", name.ToString());
+            sqlDeleteCommand.Parameters.AddWithValue("Botname", botname);
             sqlDeleteBroadcast.Parameters.AddWithValue("Channel", name.ToString());
+            sqlDeleteBroadcast.Parameters.AddWithValue("Botname", botname);
 
             bool deletedEntries = false;
             deletedEntries |= sqlDeleteChannel.ExecuteNonQuery() > 0;
@@ -124,20 +132,20 @@ namespace TwitchBot
         /// <returns>True if ssuccessfull, false if failed</returns>
         public bool RemoveBot(string botname)
         {
-            string deleteChannel = "DELETE FROM channels WHERE botname = @botname";
-            string deletePermission = "DELETE FROM permissions WHERE botname = @botname";
-            string deleteCommand = "DELETE FROM basiccommands WHERE botname = @botname";
-            string deleteBroadcast = "DELETE FROM broadcasts WHERE botname = @botname";
+            string deleteChannel    = $"DELETE FROM {CHANNELS_TABLE} WHERE botname = @Botname";
+            string deletePermission = $"DELETE FROM {PERMISSIONS_TABLE} WHERE botname = @Botname";
+            string deleteCommand    = $"DELETE FROM {BASIC_COMMANDS_TABLE} WHERE botname = @Botname";
+            string deleteBroadcast  = $"DELETE FROM {BROADCASTS_TABLE} WHERE botname = @Botname";
 
             var sqlDeleteChannel = new SqliteCommand(deleteChannel, dbConnection);
             var sqlDeletePermission = new SqliteCommand(deletePermission, dbConnection);
             var sqlDeleteCommand = new SqliteCommand(deleteCommand, dbConnection);
             var sqlDeleteBroadcast = new SqliteCommand(deleteBroadcast, dbConnection);
 
-            sqlDeleteChannel.Parameters.AddWithValue("botname", botname);
-            sqlDeletePermission.Parameters.AddWithValue("botname", botname);
-            sqlDeleteCommand.Parameters.AddWithValue("botname", botname);
-            sqlDeleteBroadcast.Parameters.AddWithValue("botname", botname);
+            sqlDeleteChannel.Parameters.AddWithValue("Botname", botname);
+            sqlDeletePermission.Parameters.AddWithValue("Botname", botname);
+            sqlDeleteCommand.Parameters.AddWithValue("Botname", botname);
+            sqlDeleteBroadcast.Parameters.AddWithValue("Botname", botname);
 
             bool deletedEntries = false;
             deletedEntries |= sqlDeleteChannel.ExecuteNonQuery() > 0;
@@ -148,24 +156,19 @@ namespace TwitchBot
             return deletedEntries;
         }
 
-        /// <summary>
-        /// Queries all permissions from the database
-        /// </summary>
-        /// <returns>Dictionary that contains all permissions</returns>
-        public Dictionary<ChannelUsernamePair, int> QueryPermissions()
+        public int QueryPermission(string channel, string name, string botname)
         {
-            Dictionary<ChannelUsernamePair, int> permissions = new Dictionary<ChannelUsernamePair, int>();
-            var query = new SqliteCommand("SELECT * FROM permissions", dbConnection);
+            var query = new SqliteCommand($"SELECT permission FROM {PERMISSIONS_TABLE} WHERE channel = @Channel AND name = @Name AND botname = @Botname", dbConnection);
+            query.Parameters.AddWithValue("Channel", channel);
+            query.Parameters.AddWithValue("Name", name);
+            query.Parameters.AddWithValue("Botname", botname);
             SqliteDataReader reader = query.ExecuteReader();
-            while (reader.Read())
+            if(reader.Read())
             {
-                Console.WriteLine("Channel: " + reader["channel"] + "\nName: " + reader["name"] + "\npermission: " + reader["permission"]);
-                if (reader["channel"] == null)
-                    permissions.Add(new ChannelUsernamePair(null, reader["name"].ToString(), true), reader.GetInt32(1));
-                else
-                    permissions.Add(new ChannelUsernamePair(new ChannelName(reader["channel"].ToString()), reader["name"].ToString(), false), reader.GetInt32(1));
+                return reader.GetInt32(0);
             }
-            return permissions;
+            // If no permission entry was found that means it defaults to 0 => no permissions
+            return 0;
         }
 
         /// <summary>
@@ -174,10 +177,15 @@ namespace TwitchBot
         /// <param name="pair">ChannelUserNamePair that contains the user whose permission if to be updated</param>
         /// <param name="permission">Permission level to set</param>
         /// <returns>True if a permission was updated, false if not</returns>
-        public bool UpdatePermission(ChannelUsernamePair pair, int permission)
+        public bool UpdatePermission(ChannelUsernamePair pair, int permission, string botname)
         {
-            string commandUpdateLocal = "UPDATE permissions SET permission = @Permission WHERE channel = @Channel AND name = @Name";
-            string commandUpdateGlobal = "UPDATE permissions SET permission = @Permission WHERE channel IS NULL AND name = @Name";
+            if(permission == 0)
+            {
+                // 0 is default value which means we can delete the entry
+                return DeletePermission(pair, botname);
+            }
+            string commandUpdateLocal  = $"UPDATE {PERMISSIONS_TABLE} SET permission = @Permission WHERE channel = @Channel AND name = @Name AND botname = @Botname";
+            string commandUpdateGlobal = $"UPDATE {PERMISSIONS_TABLE} SET permission = @Permission WHERE channel IS NULL AND name = @Name";
             SqliteCommand command;
             if (pair.IsGlobal)
             {
@@ -191,6 +199,7 @@ namespace TwitchBot
                 command.Parameters.AddWithValue("Channel", pair.Channel.ToString());
                 command.Parameters.AddWithValue("Permission", permission);
                 command.Parameters.AddWithValue("Name", pair.Username);
+                command.Parameters.AddWithValue("Botname", botname);
             }
             try
             {
@@ -208,20 +217,29 @@ namespace TwitchBot
         /// <param name="pair">ChannelUsernamePair to set permission for</param>
         /// <param name="permission">Permission level to set</param>
         /// <returns>True if permission was updated, false if not</returns>
-        public bool AddPermission(ChannelUsernamePair pair, int permission)
+        public bool AddPermission(ChannelUsernamePair pair, int permission, string botname)
         {
-            string command = "INSERT into permissions (channel, permission, name) values (@Channel, @Permission, @Name)";
+            if(permission == 0)
+            {
+                // Don't add default values
+                return DeletePermission(pair, botname);
+            }
+            string command = $"INSERT into {PERMISSIONS_TABLE} (channel, permission, name, botname) values (@Channel, @Permission, @Name, @Botname)";// ON CONFLICT(channel, name, botname) DO UPDATE SET permission=@Permission";
             var sqlCommand = new SqliteCommand(command, dbConnection);
             sqlCommand.Parameters.AddWithValue("Channel", pair.Channel.ToString());
             sqlCommand.Parameters.AddWithValue("Permission", permission);
             sqlCommand.Parameters.AddWithValue("Name", pair.Username);
+            sqlCommand.Parameters.AddWithValue("Botname", botname);
             try
             {
-                return sqlCommand.ExecuteNonQuery() > 0;
+                int modified = sqlCommand.ExecuteNonQuery();
+                Console.WriteLine(modified);
+                return modified > 0;
             }
-            catch (SqliteException)
+            catch (SqliteException e)
             {
-                return false;
+                throw e;
+                //return false;
             }
         }
 
@@ -230,20 +248,21 @@ namespace TwitchBot
         /// </summary>
         /// <param name="pair">ChannelUsernamePair to be deleted</param>
         /// <returns></returns>
-        public bool DeletePermission(ChannelUsernamePair pair)
+        public bool DeletePermission(ChannelUsernamePair pair, string botname)
         {
-            string deleteLocal = "DELETE FROM permission WHERE channel = @Channel AND name = @Name";
-            string deleteGlobal = "DELETE FROM permission WHERE channel IS NULL AND name = @Name";
+            string deleteLocal  = $"DELETE FROM {PERMISSIONS_TABLE} WHERE channel = @Channel AND name = @Name AND botname = @Botname";
+            string deleteGlobal = $"DELETE FROM {PERMISSIONS_TABLE} WHERE channel IS NULL AND name = @Name";
             SqliteCommand sqlCommand;
             if (pair.IsGlobal) {
-                sqlCommand = new SqliteCommand(deleteLocal, dbConnection);
+                sqlCommand = new SqliteCommand(deleteGlobal, dbConnection);
                 sqlCommand.Parameters.AddWithValue("Name", pair.Username);
             }
             else
             {
-                sqlCommand = new SqliteCommand(deleteGlobal, dbConnection);
+                sqlCommand = new SqliteCommand(deleteLocal, dbConnection);
                 sqlCommand.Parameters.AddWithValue("Channel", pair.Channel.ToString());
                 sqlCommand.Parameters.AddWithValue("Name", pair.Username);
+                sqlCommand.Parameters.AddWithValue("Botname", botname);
             }
             return sqlCommand.ExecuteNonQuery() > 0;
         }
@@ -253,12 +272,13 @@ namespace TwitchBot
         /// </summary>
         /// <param name="channel">Channel name to query commands for</param>
         /// <returns>Dictionary containing name/response pairs</returns>
-        public Dictionary<string, Command> QueryBasicCommands(ChannelName channel)
+        public Dictionary<string, Command> QueryBasicCommands(ChannelName channel, string botname)
         {
-            string query = "SELECT * FROM basiccommands WHERE channel = @Channel";
+            string query = $"SELECT * FROM {BASIC_COMMANDS_TABLE} WHERE channel = @Channel AND botname = @Botname";
             Dictionary<string, Command> basicCommands = new Dictionary<string, Command>();
             var sqlQuery = new SqliteCommand(query, dbConnection);
             sqlQuery.Parameters.AddWithValue("Channel", channel.ToString());
+            sqlQuery.Parameters.AddWithValue("Botname", botname);
             SqliteDataReader reader = sqlQuery.ExecuteReader();
             while (reader.Read())
             {
@@ -274,13 +294,14 @@ namespace TwitchBot
         /// <param name="name">Name of the command without prefix</param>
         /// <param name="response">Response to the command</param>
         /// <returns>True if command was added, false if not</returns>
-        public bool AddBasicCommand(ChannelName channel, string name, string response)
+        public bool AddBasicCommand(ChannelName channel, string name, string response, string botname)
         {
-            string insert = "INSERT into basiccommands (channel, name, response) values (@Channel, @Name, @Response)";
+            string insert  = $"INSERT into {BASIC_COMMANDS_TABLE} (channel, name, response, botname) values (@Channel, @Name, @Response, @Botname)";
             var sqlCommand = new SqliteCommand(insert, dbConnection);
             sqlCommand.Parameters.AddWithValue("Channel", channel.ToString());
             sqlCommand.Parameters.AddWithValue("Name", name);
             sqlCommand.Parameters.AddWithValue("Response", response);
+            sqlCommand.Parameters.AddWithValue("Botname", botname);
             try
             {
                 return sqlCommand.ExecuteNonQuery() > 0;
@@ -298,13 +319,14 @@ namespace TwitchBot
         /// <param name="name">Name of the command</param>
         /// <param name="response">Response to the command</param>
         /// <returns>True if command was updated, false if not</returns>
-        public bool UpdateBasicCommand(ChannelName channel, string name, string response)
+        public bool UpdateBasicCommand(ChannelName channel, string name, string response, string botname)
         {
-            string updateCommand = "UPDATE basiccommands SET response = @Response WHERE channel = @Channel AND name = @Name";
+            string updateCommand  = $"UPDATE {BASIC_COMMANDS_TABLE} SET response = @Response WHERE channel = @Channel AND name = @Name AND botname = @Botname";
             SqliteCommand command = new SqliteCommand(updateCommand, dbConnection);
             command.Parameters.AddWithValue("Response", response);
             command.Parameters.AddWithValue("Channel", channel.ToString());
             command.Parameters.AddWithValue("Name", name);
+            command.Parameters.AddWithValue("Botname", botname);
             try
             {
                 return command.ExecuteNonQuery() > 0;
@@ -321,12 +343,13 @@ namespace TwitchBot
         /// <param name="channel">Channel the command belongs to</param>
         /// <param name="name">Name of the command</param>
         /// <returns></returns>
-        public bool RemoveBasicCommand(ChannelName channel, string name)
+        public bool RemoveBasicCommand(ChannelName channel, string name, string botname)
         {
-            string updateCommand = "DELETE FROM basiccommands WHERE channel = @Channel AND name = @Name";
+            string updateCommand = $"DELETE FROM {BASIC_COMMANDS_TABLE} WHERE channel = @Channel AND name = @Name AND botname = @Botname";
             SqliteCommand command = new SqliteCommand(updateCommand, dbConnection);
             command.Parameters.AddWithValue("Channel", channel.ToString());
             command.Parameters.AddWithValue("Name", name);
+            command.Parameters.AddWithValue("Botname", botname);
             try
             {
                 return command.ExecuteNonQuery() > 0;

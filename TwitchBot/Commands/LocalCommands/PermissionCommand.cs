@@ -35,6 +35,7 @@ namespace TwitchBot.Commands
         {
             this.permissionManager = permissionManager;
             this.Channel = channel;
+            
         }
 
         /// <summary>
@@ -43,7 +44,7 @@ namespace TwitchBot.Commands
         /// <param name="line">Command line</param>
         /// <param name="sender">sender name</param>
         /// <returns>Message telling the result of the command</returns>
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string sender, string botname)
         {
             string[] parts = line.Split(" ");
 
@@ -65,13 +66,13 @@ namespace TwitchBot.Commands
                 // updated permission must be lower than his own
                 // => you cannot change someones permission if he has the same level as you
                 // and you cannot make someone the same permission level as you
-                int senderPermission = permissionManager.QueryPermission(Channel, sender);
-                int personToBeUpdatedPermission = permissionManager.QueryPermission(Channel, name);
+                int senderPermission = permissionManager.QueryPermission(Channel, sender, botname);
+                int personToBeUpdatedPermission = permissionManager.QueryPermission(Channel, name, botname);
                 if (senderPermission > personToBeUpdatedPermission)
                 {
                     if (permission < senderPermission)
                     {
-                        permissionManager.UpdatePermission(Channel, name, permission);
+                        permissionManager.UpdatePermission(Channel, name, permission, botname);
                         return new CommandResult(true, $"Permission for {name} set to {permission}");
                     }
                     return new CommandResult(false, $"{sender} The permission you set for others must be lower than yours");
@@ -83,7 +84,7 @@ namespace TwitchBot.Commands
 
             if (command.Equals("query") && parts.Length == 3)
             {
-                return new CommandResult(true, $"Permission for {name} is {permissionManager.QueryPermission(Channel, name)}");
+                return new CommandResult(true, $"Permission for {name} is {permissionManager.QueryPermission(Channel, name, botname)}");
             }
 
             return new CommandResult(false, "Invalid command");

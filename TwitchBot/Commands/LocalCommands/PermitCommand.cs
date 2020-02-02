@@ -22,7 +22,7 @@ namespace TwitchBot.Commands.LocalCommands
             return "This command gives a user permission to post a single link (the permission will expire in 1 minute if not used). Usage: !permit USER";
         }
 
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string sender, string botname)
         {
             string[] parts = line.Split(" ");
             if(parts.Length != 2)

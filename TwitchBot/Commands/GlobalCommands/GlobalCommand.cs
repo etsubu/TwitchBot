@@ -29,7 +29,7 @@ namespace TwitchBot.Commands
             return "If you do not know the global commands. You shouldn't be messing with them";
         }
 
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string sender, string botname)
         {
             return new CommandResult(false, "Unimplemented!");
         }

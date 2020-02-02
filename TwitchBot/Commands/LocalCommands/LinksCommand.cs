@@ -22,7 +22,7 @@ namespace TwitchBot.Commands.LocalCommands
             return "Usage !links true    !link false     To allow or disallow links from nontrusted users";
         }
 
-        public override CommandResult Process(string line, string sender)
+        public override CommandResult Process(string line, string sender, string botname)
         {
             line = line.ToLower();
             string[] parts = line.Split(" ");

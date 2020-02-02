@@ -31,7 +31,7 @@ namespace TwitchBot.Commands
             this.channelName = channelName;
             this.database = database;
 
-            commands = database.QueryBasicCommands(channelName); // Load the initial basic commands from the database
+            commands = database.QueryBasicCommands(channelName, irc.user); // Load the initial basic commands from the database
             this.permissionManager = permissionManager;
             BroadcastCommand broadcast = new BroadcastCommand(irc, channelName);
 
@@ -115,7 +115,7 @@ namespace TwitchBot.Commands
                 bool hasPermission = false;
                 hasPermission = (commands[name].IsGlobal) ? 
                     commands[name].HasPermission(permissionManager.QueryGlobalPermission(sender))
-                    : commands[name].HasPermission(permissionManager.QueryPermission(channelName, sender));
+                    : commands[name].HasPermission(permissionManager.QueryPermission(channelName, sender, irc.user));
 
                 if (!hasPermission)
                 {
@@ -131,7 +131,7 @@ namespace TwitchBot.Commands
                 }
                 else
                 {
-                    CommandResult result = commands[name].Process(line, sender);
+                    CommandResult result = commands[name].Process(line, sender, irc.user);
                     if (result.Response != null && result.Response.Length > 0)
                         irc.SendMessage(result.Response, channel);
                 }
@@ -153,7 +153,7 @@ namespace TwitchBot.Commands
                     return false;
 
                 //Built in commands are not removeable
-                if (commands[key].IsRemoveable && database.RemoveBasicCommand(channelName, key))
+                if (commands[key].IsRemoveable && database.RemoveBasicCommand(channelName, key, irc.user))
                     return commands.Remove(key);
 
                 return false;
@@ -175,7 +175,7 @@ namespace TwitchBot.Commands
                 if (commands.ContainsKey(key))
                 {
                     // Try to update the command to database
-                    if(database.UpdateBasicCommand(channelName, key, response))
+                    if(database.UpdateBasicCommand(channelName, key, response, irc.user))
                     {
                         // Overwrite the existing command
                         commands[cmd.Name] = new BasicCommand(key, response);
@@ -183,7 +183,7 @@ namespace TwitchBot.Commands
                     }
                     return false;
                 }
-                if (database.AddBasicCommand(channelName, key, response))
+                if (database.AddBasicCommand(channelName, key, response, irc.user))
                 {
                     commands[cmd.Name] = cmd;
                     return true;
