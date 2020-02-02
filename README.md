@@ -16,7 +16,9 @@ Twitch username for bot (empty will stop adding users):
 Input the twitch username of the person who owns the bot (will receive global admin privileges): nagrodus
 Do you wish to configure the twitch irc hostname and port. If not sure then leave empty and defaults will be used (y/n): n
 ```
-Now the configuration file will be written and the bot should start properly the next time you run it.
+Now the configuration file will be written and the bot should start properly the next time you run it.\
+Note initially the bot will only join its own channel in twitch so you need to go to that channels chat and issue !global join your_name\
+To make it join your own channel where you want to use it. In future you can use the join command in any channel the bot is present if you have the permissions.
 
 ## TODO ##
 * Vote polls
@@ -27,6 +29,9 @@ Now the configuration file will be written and the bot should start properly the
 ## Commands ##
 Variable parameters are written here with lesser than '<' and greater than '> characters. Example: !command add <command_name>
 Type variable without the <> characters e.g. !command add brackets
+* !global -- this command allows "global admins" to add or remove the bot from channels
+   * !global join USER -- this makes the bot join channel USER
+   * !global leave USER -- this makes the bot leave channel USER
 * !command
    * !command list
       * Displays all available commands
